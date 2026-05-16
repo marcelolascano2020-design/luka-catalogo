@@ -7,7 +7,7 @@ export default function Header({ query, setQuery, totalItems, onCartOpen, onCalc
     <header className="luka-top">
       <div className="luka-top-inner">
         <a className="luka-brand" href="#">
-          <img src="/assets/logo.jpg" alt="Luka" className="luka-logo" />
+          <img src="/assets/logo.jpg" alt="Luka" className="luka-logo" style={{ objectFit: 'contain' }} />
           <div className="luka-brand-text">
             <strong>Luka</strong>
             <span>Alimentos balanceados para mascotas</span>

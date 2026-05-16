@@ -4,7 +4,7 @@ export default function Footer() {
       <div className="luka-footer-inner">
         <div>
           <div className="luka-footer-brand">
-            <img src="/assets/logo.jpg" alt="Luka" className="luka-logo-sm" />
+            <img src="/assets/logo.jpg" alt="Luka" className="luka-logo-sm" style={{ objectFit: 'contain' }} />
             <div>
               <strong>Luka</strong>
               <span>Alimentos balanceados para mascotas</span>
