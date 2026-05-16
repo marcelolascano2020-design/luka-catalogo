@@ -1,0 +1,44 @@
+import { Icon } from './Icons';
+
+const WA_PHONE = import.meta.env.VITE_WHATSAPP_NUMBER || "5493515504248";
+
+export default function CategoryFilter({ cats, cat, setCat, pet, setPet, sort, setSort, counts, filterOpen, onCalcOpen }) {
+  return (
+    <aside className={`luka-side ${filterOpen ? 'is-open' : ''}`}>
+      <div className="luka-side-section">
+        <div className="luka-side-title">Mascota</div>
+        <div className="luka-chips">
+          {[['all','Todas'],['Perro','Perros'],['Gato','Gatos'],['Ave','Aves'],['Varios','Varios']].map(([v, l]) => (
+            <button key={v} className={`luka-chip ${pet === v ? 'on' : ''}`} onClick={() => setPet(v)}>{l}</button>
+          ))}
+        </div>
+      </div>
+      <div className="luka-side-section">
+        <div className="luka-side-title">Categoría</div>
+        <button className={`luka-catbtn ${cat === 'all' ? 'on' : ''}`} onClick={() => setCat('all')}>
+          <span>Todo el catálogo</span><em>{counts.all}</em>
+        </button>
+        {cats.map(c => (
+          <button key={c.id} className={`luka-catbtn ${cat === c.id ? 'on' : ''}`} onClick={() => setCat(c.id)}>
+            <span>{c.label}</span><em>{counts[c.id]}</em>
+          </button>
+        ))}
+      </div>
+      <div className="luka-side-section">
+        <div className="luka-side-title">Ordenar</div>
+        <select className="luka-select" value={sort} onChange={e => setSort(e.target.value)}>
+          <option value="default">Sugerido</option>
+          <option value="az">Nombre A–Z</option>
+          <option value="brand">Marca A–Z</option>
+        </select>
+      </div>
+      <div className="luka-side-help">
+        <div className="luka-eyebrow">¿Dudas?</div>
+        <p>Los precios y stock se confirman por WhatsApp. Te asesoramos para elegir el alimento ideal.</p>
+        <a className="luka-cta-wa luka-cta-wa-mini" href={`https://wa.me/${WA_PHONE}`} target="_blank" rel="noopener noreferrer">
+          <Icon.Whatsapp s={14} /> Escribinos
+        </a>
+      </div>
+    </aside>
+  );
+}

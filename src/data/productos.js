@@ -1,0 +1,75 @@
+export const CATEGORIAS = [
+  { id: "perros",     label: "Perros",     short: "🐶" },
+  { id: "gatos",      label: "Gatos",      short: "🐱" },
+  { id: "aves",       label: "Aves",       short: "🐦" },
+  { id: "snacks",     label: "Snacks",     short: "🦴" },
+  { id: "accesorios", label: "Accesorios", short: "🎾" },
+];
+
+export const PRODUCTOS = [
+  // ───────── PERROS (16) ─────────
+  { id: "p01", cat: "perros", pet: "Perro", name: "Premium Adulto Razas Pequeñas", brand: "NutriCan", size: "3 kg", tags: ["Adulto", "Razas pequeñas"], desc: "Croqueta pequeña, alta digestibilidad. Pollo y arroz." },
+  { id: "p02", cat: "perros", pet: "Perro", name: "Premium Adulto Razas Pequeñas", brand: "NutriCan", size: "7,5 kg", tags: ["Adulto", "Razas pequeñas"], desc: "Croqueta pequeña, alta digestibilidad. Pollo y arroz." },
+  { id: "p03", cat: "perros", pet: "Perro", name: "Premium Adulto Razas Medianas", brand: "NutriCan", size: "15 kg", tags: ["Adulto", "Razas medianas"], desc: "Fórmula completa para perros activos." },
+  { id: "p04", cat: "perros", pet: "Perro", name: "Premium Adulto Razas Grandes", brand: "NutriCan", size: "20 kg", tags: ["Adulto", "Razas grandes"], desc: "Croqueta grande, soporte articular con condroitina." },
+  { id: "p05", cat: "perros", pet: "Perro", name: "Cachorro Razas Pequeñas", brand: "NutriCan", size: "3 kg", tags: ["Cachorro", "Razas pequeñas"], desc: "Alto en proteína para crecimiento. Pollo." },
+  { id: "p06", cat: "perros", pet: "Perro", name: "Cachorro Razas Medianas y Grandes", brand: "NutriCan", size: "15 kg", tags: ["Cachorro"], desc: "Calcio y fósforo balanceados para huesos fuertes." },
+  { id: "p07", cat: "perros", pet: "Perro", name: "Senior +7 Años", brand: "NutriCan", size: "15 kg", tags: ["Senior"], desc: "Menor grasa, soporte cardíaco y articular." },
+  { id: "p08", cat: "perros", pet: "Perro", name: "Vital Adulto", brand: "Vital Dog", size: "21 kg", tags: ["Adulto", "Económico"], desc: "Alimento estándar para perros adultos. Buena relación precio-calidad." },
+  { id: "p09", cat: "perros", pet: "Perro", name: "Vital Cachorro", brand: "Vital Dog", size: "21 kg", tags: ["Cachorro", "Económico"], desc: "Cachorro estándar, croqueta mediana." },
+  { id: "p10", cat: "perros", pet: "Perro", name: "Carne y Cereales", brand: "Campo Fiel", size: "22 kg", tags: ["Adulto", "Económico"], desc: "Receta clásica para perros adultos." },
+  { id: "p11", cat: "perros", pet: "Perro", name: "Super Premium Cordero y Arroz", brand: "Origen Natural", size: "12 kg", tags: ["Super Premium", "Hipoalergénico"], desc: "Proteína única de cordero, ideal para pieles sensibles." },
+  { id: "p12", cat: "perros", pet: "Perro", name: "Super Premium Salmón", brand: "Origen Natural", size: "12 kg", tags: ["Super Premium", "Omega 3"], desc: "Salmón y batata. Pelaje brillante, digestión suave." },
+  { id: "p13", cat: "perros", pet: "Perro", name: "Light Control de Peso", brand: "NutriCan", size: "15 kg", tags: ["Adulto", "Light"], desc: "Reducido en grasa, alto en fibra. Saciedad." },
+  { id: "p14", cat: "perros", pet: "Perro", name: "Hipoalergénico Pollo y Arroz", brand: "Origen Natural", size: "10 kg", tags: ["Super Premium", "Hipoalergénico"], desc: "Sin trigo ni maíz. Para sensibilidades digestivas." },
+  { id: "p15", cat: "perros", pet: "Perro", name: "Mix Carne y Cereales", brand: "Campo Fiel", size: "8 kg", tags: ["Adulto", "Económico"], desc: "Bolsa hogareña, croqueta mediana." },
+  { id: "p16", cat: "perros", pet: "Perro", name: "Pet Performance Activo", brand: "Vital Dog", size: "15 kg", tags: ["Adulto", "Alta energía"], desc: "Para perros muy activos o de trabajo." },
+
+  // ───────── GATOS (12) ─────────
+  { id: "g01", cat: "gatos", pet: "Gato", name: "Adulto Carne", brand: "NutriCat", size: "1 kg", tags: ["Adulto"], desc: "Croqueta crujiente sabor carne." },
+  { id: "g02", cat: "gatos", pet: "Gato", name: "Adulto Carne", brand: "NutriCat", size: "3 kg", tags: ["Adulto"], desc: "Croqueta crujiente sabor carne." },
+  { id: "g03", cat: "gatos", pet: "Gato", name: "Adulto Pescado", brand: "NutriCat", size: "3 kg", tags: ["Adulto", "Omega 3"], desc: "Pescado de mar y arroz." },
+  { id: "g04", cat: "gatos", pet: "Gato", name: "Kitten Crecimiento", brand: "NutriCat", size: "1,5 kg", tags: ["Cachorro"], desc: "Alta proteína para gatitos de 2 a 12 meses." },
+  { id: "g05", cat: "gatos", pet: "Gato", name: "Indoor Pelos y Bolas", brand: "NutriCat", size: "3 kg", tags: ["Adulto", "Indoor"], desc: "Fibra para control de bolas de pelo." },
+  { id: "g06", cat: "gatos", pet: "Gato", name: "Castrado / Esterilizado", brand: "NutriCat", size: "3 kg", tags: ["Adulto", "Castrado"], desc: "Bajo en magnesio, controla peso post-castración." },
+  { id: "g07", cat: "gatos", pet: "Gato", name: "Senior +10 Años", brand: "NutriCat", size: "2 kg", tags: ["Senior"], desc: "Croqueta blanda, soporte renal." },
+  { id: "g08", cat: "gatos", pet: "Gato", name: "Felix Mix Adulto", brand: "FelixGold", size: "7,5 kg", tags: ["Adulto", "Económico"], desc: "Mezcla económica con vitaminas." },
+  { id: "g09", cat: "gatos", pet: "Gato", name: "Felix Kitten", brand: "FelixGold", size: "1 kg", tags: ["Cachorro", "Económico"], desc: "Bolsa de inicio para gatitos." },
+  { id: "g10", cat: "gatos", pet: "Gato", name: "Super Premium Pollo y Atún", brand: "Origen Natural", size: "7,5 kg", tags: ["Super Premium"], desc: "Sin colorantes ni saborizantes artificiales." },
+  { id: "g11", cat: "gatos", pet: "Gato", name: "Urinary Care", brand: "NutriCat", size: "3 kg", tags: ["Adulto", "Urinario"], desc: "PH balanceado para tracto urinario." },
+  { id: "g12", cat: "gatos", pet: "Gato", name: "Arena Sanitaria Aglomerante", brand: "PuroGato", size: "10 kg", tags: ["Arena"], desc: "Aglomera rápido, controla olor. Aroma neutro." },
+
+  // ───────── AVES (8) ─────────
+  { id: "a01", cat: "aves", pet: "Ave", name: "Mixtura Canarios", brand: "Plumaje", size: "1 kg", tags: ["Canarios"], desc: "Alpiste, nabo y avena. Sin semillas oleaginosas en exceso." },
+  { id: "a02", cat: "aves", pet: "Ave", name: "Mixtura Canarios", brand: "Plumaje", size: "5 kg", tags: ["Canarios"], desc: "Bolsa grande para criadores." },
+  { id: "a03", cat: "aves", pet: "Ave", name: "Mixtura Pericos / Cotorras", brand: "Plumaje", size: "1 kg", tags: ["Pericos"], desc: "Mijo, alpiste, girasol pelado." },
+  { id: "a04", cat: "aves", pet: "Ave", name: "Mixtura Periquitos Australianos", brand: "Plumaje", size: "1 kg", tags: ["Periquitos"], desc: "Mezcla fina para aves pequeñas." },
+  { id: "a05", cat: "aves", pet: "Ave", name: "Mixtura Loros / Aves Grandes", brand: "Plumaje", size: "2 kg", tags: ["Loros"], desc: "Maíz partido, girasol, maní, frutas deshidratadas." },
+  { id: "a06", cat: "aves", pet: "Ave", name: "Alpiste Limpio Premium", brand: "Plumaje", size: "1 kg", tags: ["Semilla"], desc: "Seleccionado y zarandeado." },
+  { id: "a07", cat: "aves", pet: "Ave", name: "Pasta de Cría Insectívora", brand: "Plumaje", size: "500 g", tags: ["Cría"], desc: "Suplemento proteico para época de cría." },
+  { id: "a08", cat: "aves", pet: "Ave", name: "Hueso de Jibia", brand: "Plumaje", size: "Unidad", tags: ["Suplemento"], desc: "Aporte de calcio natural." },
+
+  // ───────── SNACKS Y PREMIOS (8) ─────────
+  { id: "s01", cat: "snacks", pet: "Perro", name: "Hueso de Cuero Vacuno", brand: "Snack&Co", size: "Mediano", tags: ["Perro", "Masticable"], desc: "Limpieza dental natural. Larga duración." },
+  { id: "s02", cat: "snacks", pet: "Perro", name: "Galletitas Mix Sabores", brand: "Snack&Co", size: "500 g", tags: ["Perro", "Premio"], desc: "Galletitas crujientes en formas divertidas." },
+  { id: "s03", cat: "snacks", pet: "Perro", name: "Tiras de Pollo Deshidratado", brand: "Snack&Co", size: "100 g", tags: ["Perro", "Natural"], desc: "100% pollo, sin conservantes." },
+  { id: "s04", cat: "snacks", pet: "Perro", name: "Bastones Dentales", brand: "Snack&Co", size: "7 unidades", tags: ["Perro", "Dental"], desc: "Reduce sarro, refresca el aliento." },
+  { id: "s05", cat: "snacks", pet: "Gato", name: "Premios Crocantes Atún", brand: "FelixGold", size: "60 g", tags: ["Gato", "Premio"], desc: "Bocaditos rellenos sabor atún." },
+  { id: "s06", cat: "snacks", pet: "Gato", name: "Catnip Natural", brand: "FelixGold", size: "20 g", tags: ["Gato", "Hierba"], desc: "Hierba gatera para estimular el juego." },
+  { id: "s07", cat: "snacks", pet: "Perro", name: "Orejitas de Cerdo", brand: "Snack&Co", size: "Unidad", tags: ["Perro", "Natural"], desc: "Snack masticable 100% natural." },
+  { id: "s08", cat: "snacks", pet: "Perro", name: "Pack Premios Entrenamiento", brand: "Snack&Co", size: "200 g", tags: ["Perro", "Premio"], desc: "Mini bocados blandos para entrenar." },
+
+  // ───────── ACCESORIOS (12) ─────────
+  { id: "ac01", cat: "accesorios", pet: "Perro", name: "Collar de Cuero Ajustable", brand: "Luka Pet", size: "M / L / XL", tags: ["Perro", "Collar"], desc: "Cuero genuino, hebilla metálica." },
+  { id: "ac02", cat: "accesorios", pet: "Perro", name: "Correa Reforzada con Mosquetón", brand: "Luka Pet", size: "1,2 m", tags: ["Perro", "Correa"], desc: "Nylon reforzado, manija acolchada." },
+  { id: "ac03", cat: "accesorios", pet: "Perro", name: "Pretal Anti-Tirón", brand: "Luka Pet", size: "S / M / L", tags: ["Perro", "Arnés"], desc: "Acolchado, regulable. Talles disponibles." },
+  { id: "ac04", cat: "accesorios", pet: "Perro", name: "Cama Acolchada Redonda", brand: "Luka Pet", size: "60 / 80 cm", tags: ["Perro", "Cama"], desc: "Funda lavable, relleno suave." },
+  { id: "ac05", cat: "accesorios", pet: "Gato", name: "Rascador Torre con Casita", brand: "Luka Pet", size: "70 cm", tags: ["Gato", "Rascador"], desc: "Sisal natural, base estable." },
+  { id: "ac06", cat: "accesorios", pet: "Perro", name: "Pelota de Goma Resistente", brand: "Luka Pet", size: "M", tags: ["Perro", "Juguete"], desc: "Para mordedores. Goma maciza." },
+  { id: "ac07", cat: "accesorios", pet: "Perro", name: "Mordillo Cuerda Trenzada", brand: "Luka Pet", size: "Grande", tags: ["Perro", "Juguete"], desc: "Algodón. Ideal para juego y dentición." },
+  { id: "ac08", cat: "accesorios", pet: "Varios", name: "Comedero Doble Acero Inoxidable", brand: "Luka Pet", size: "Mediano", tags: ["Comedero"], desc: "Base antideslizante. No oxida." },
+  { id: "ac09", cat: "accesorios", pet: "Varios", name: "Bebedero Automático 2 L", brand: "Luka Pet", size: "2 L", tags: ["Bebedero"], desc: "Dispensador por gravedad." },
+  { id: "ac10", cat: "accesorios", pet: "Gato", name: "Bandeja Sanitaria con Pala", brand: "Luka Pet", size: "Estándar", tags: ["Gato", "Sanitario"], desc: "Bandeja amplia + pala incluida." },
+  { id: "ac11", cat: "accesorios", pet: "Perro", name: "Shampoo Hipoalergénico", brand: "Luka Pet", size: "500 ml", tags: ["Higiene"], desc: "Pieles sensibles. PH neutro." },
+  { id: "ac12", cat: "accesorios", pet: "Perro", name: "Cepillo Quita Pelos", brand: "Luka Pet", size: "Mediano", tags: ["Higiene"], desc: "Reduce muda. Cerdas firmes." },
+];
