@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { supabase } from '../lib/supabase';
+import { supabase, supabaseReady } from '../lib/supabase';
 import { useAuth } from '../hooks/useAuth';
 import { Icon } from './Icons';
 
@@ -13,6 +13,10 @@ function LoginModal({ onClose }) {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (!supabaseReady) {
+      setError('Servicio no disponible: variables de entorno no configuradas.');
+      return;
+    }
     setLoading(true);
     setError('');
     const { error: err } = await supabase.auth.signInWithPassword({ email, password });
