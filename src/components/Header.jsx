@@ -101,12 +101,10 @@ export default function Header({ query, setQuery, totalItems, onCartOpen, onCalc
   const navigate = useNavigate();
   const [loginOpen, setLoginOpen] = useState(false);
 
-  // Redirect after login based on role
+  // Redirect after login based on role — wait for role to be fetched (not null)
   useEffect(() => {
-    if (!loading && session && role) {
-      if (role === 'admin') {
-        navigate('/admin', { replace: true });
-      }
+    if (!loading && session && role !== null) {
+      if (role === 'admin') navigate('/admin', { replace: true });
       setLoginOpen(false);
     }
   }, [loading, session, role, navigate]);
