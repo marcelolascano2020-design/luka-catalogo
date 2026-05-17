@@ -1,9 +1,11 @@
 import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
+import { useAuth } from '../hooks/useAuth';
 import { Icon } from './Icons';
 
 // ─── Login ───────────────────────────────────────────────────────────────────
-function LoginForm({ onLogin }) {
+function LoginForm() {
   const [email, setEmail] = useState('marcelolascano2020@gmail.com');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
@@ -15,7 +17,6 @@ function LoginForm({ onLogin }) {
     setError('');
     const { error } = await supabase.auth.signInWithPassword({ email, password });
     if (error) setError(error.message);
-    else onLogin();
     setLoading(false);
   };
 
@@ -183,8 +184,8 @@ function CategoryForm({ onSave }) {
 
 // ─── Main AdminPanel ──────────────────────────────────────────────────────────
 export default function AdminPanel() {
-  const [session, setSession] = useState(null);
-  const [loadingSession, setLoadingSession] = useState(true);
+  const { session, role, loading: loadingAuth } = useAuth();
+  const navigate = useNavigate();
   const [tab, setTab] = useState('productos');
 
   const [productos, setProductos] = useState([]);
@@ -195,17 +196,14 @@ export default function AdminPanel() {
   const [confirmDelete, setConfirmDelete] = useState(null);
 
   useEffect(() => {
-    supabase.auth.getSession().then(({ data }) => {
-      setSession(data.session);
-      setLoadingSession(false);
-    });
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_e, s) => setSession(s));
-    return () => subscription.unsubscribe();
-  }, []);
+    if (!loadingAuth && session && role !== 'admin') {
+      navigate('/', { replace: true });
+    }
+  }, [loadingAuth, session, role, navigate]);
 
   useEffect(() => {
-    if (session) fetchAll();
-  }, [session]);
+    if (session && role === 'admin') fetchAll();
+  }, [session, role]);
 
   const fetchAll = async () => {
     setLoadingData(true);
@@ -233,8 +231,9 @@ export default function AdminPanel() {
     await supabase.auth.signOut();
   };
 
-  if (loadingSession) return <div style={{ padding: 40, textAlign: 'center' }}>Cargando…</div>;
-  if (!session) return <LoginForm onLogin={() => {}} />;
+  if (loadingAuth) return <div style={{ padding: 40, textAlign: 'center' }}>Cargando…</div>;
+  if (!session) return <LoginForm />;
+  if (role !== 'admin') return null;
 
   return (
     <div style={{ minHeight: '100vh', background: 'var(--bg)', fontFamily: 'inherit' }}>
