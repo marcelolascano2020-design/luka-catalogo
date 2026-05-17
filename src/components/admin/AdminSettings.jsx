@@ -2,133 +2,230 @@ import { useState, useEffect } from 'react';
 import { supabase } from '../../lib/supabase';
 import { Icon } from '../Icons';
 
-const inputStyle = {
-  padding: '9px 12px', border: '1px solid var(--line-2)', borderRadius: 10,
-  background: 'var(--bg)', fontSize: 14, color: 'var(--ink)',
+const inp = {
+  padding: '10px 13px', border: '1.5px solid #e0d8d0', borderRadius: 10,
+  fontSize: 14, background: '#faf8f5', color: '#2b1f14',
   width: '100%', boxSizing: 'border-box',
 };
+const fld = { display: 'flex', flexDirection: 'column', gap: 6 };
+const lbl = { fontSize: 12, fontWeight: 700, color: '#555', textTransform: 'uppercase', letterSpacing: '0.04em' };
 
 const DEFAULTS = {
   nombre_negocio: 'Luka',
-  direccion: 'Octavio Pinto 2207, Córdoba',
-  telefono: '+54 9 3515 50-4248',
-  whatsapp: '5493515504248',
-  descripcion: 'Alimentos balanceados para mascotas',
-  horario: '',
+  descripcion:    'Alimentos balanceados para mascotas',
+  direccion:      'Octavio Pinto 2207, Córdoba',
+  telefono:       '+54 9 3515 50-4248',
+  whatsapp:       '5493515504248',
+  horario:        '',
 };
-
-const STORAGE_KEY = 'luka-config';
+const LS_KEY = 'luka-config';
 
 export default function AdminSettings() {
-  const [config, setConfig] = useState(DEFAULTS);
-  const [saving, setSaving] = useState(false);
-  const [saved, setSaved] = useState(false);
-  const [source, setSource] = useState('local');
+  const [config, setConfig]  = useState(DEFAULTS);
+  const [saving, setSaving]  = useState(false);
+  const [saved, setSaved]    = useState(false);
+  const [useDb, setUseDb]    = useState(false);
+  const [tab, setTab]        = useState('config'); // 'config' | 'sql'
 
   useEffect(() => {
-    const loadConfig = async () => {
-      // Try Supabase configuracion table first
-      const { data } = await supabase.from('configuracion').select('*');
-      if (data && data.length > 0) {
-        const dbConfig = {};
-        data.forEach(row => { dbConfig[row.clave] = row.valor; });
-        setConfig(prev => ({ ...prev, ...dbConfig }));
-        setSource('supabase');
+    const load = async () => {
+      // Try DB first
+      const { data, error } = await supabase.from('configuracion').select('*');
+      if (!error && data?.length) {
+        const obj = {};
+        data.forEach(r => { obj[r.clave] = r.valor; });
+        setConfig(c => ({ ...c, ...obj }));
+        setUseDb(true);
         return;
       }
-      // Fallback: localStorage
+      // Fallback localStorage
       try {
-        const raw = localStorage.getItem(STORAGE_KEY);
-        if (raw) { setConfig(prev => ({ ...prev, ...JSON.parse(raw) })); }
+        const raw = localStorage.getItem(LS_KEY);
+        if (raw) setConfig(c => ({ ...c, ...JSON.parse(raw) }));
       } catch (_) {}
     };
-    loadConfig();
+    load();
   }, []);
 
-  const set = (k, v) => setConfig(f => ({ ...f, [k]: v }));
+  const set = (k, v) => setConfig(c => ({ ...c, [k]: v }));
 
   const handleSave = async (e) => {
     e.preventDefault();
     setSaving(true);
     setSaved(false);
 
-    // Try to save to Supabase
-    let savedToDb = false;
+    // Try Supabase
+    let dbOk = false;
     try {
       const rows = Object.entries(config).map(([clave, valor]) => ({ clave, valor }));
       const { error } = await supabase.from('configuracion').upsert(rows, { onConflict: 'clave' });
-      if (!error) { savedToDb = true; setSource('supabase'); }
+      if (!error) { dbOk = true; setUseDb(true); }
     } catch (_) {}
 
-    // Always save to localStorage as backup
-    try { localStorage.setItem(STORAGE_KEY, JSON.stringify(config)); } catch (_) {}
+    // Always save locally too
+    try { localStorage.setItem(LS_KEY, JSON.stringify(config)); } catch (_) {}
+    if (!dbOk) setUseDb(false);
 
-    if (!savedToDb) setSource('local');
     setSaving(false);
     setSaved(true);
     setTimeout(() => setSaved(false), 3000);
   };
 
-  return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
-      <div>
-        <h2 style={{ fontSize: 22, margin: '0 0 4px' }}>Configuración del negocio</h2>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 12, color: 'var(--muted)' }}>
-          {source === 'supabase'
-            ? <><Icon.Check s={12} /> Datos guardados en Supabase</>
-            : <><Icon.Settings s={12} /> Guardado en localStorage (local)</>
-          }
-        </div>
-      </div>
-
-      <form onSubmit={handleSave} style={{ background: 'var(--paper)', borderRadius: 16, padding: 24, border: '1px solid var(--line-2)', display: 'flex', flexDirection: 'column', gap: 16 }}>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: 16 }}>
-          <label className="luka-field">
-            <span>Nombre del negocio</span>
-            <input type="text" value={config.nombre_negocio} onChange={e => set('nombre_negocio', e.target.value)} style={inputStyle} />
-          </label>
-          <label className="luka-field">
-            <span>Descripción breve</span>
-            <input type="text" value={config.descripcion} onChange={e => set('descripcion', e.target.value)} style={inputStyle} />
-          </label>
-          <label className="luka-field">
-            <span>Dirección</span>
-            <input type="text" value={config.direccion} onChange={e => set('direccion', e.target.value)} style={inputStyle} />
-          </label>
-          <label className="luka-field">
-            <span>Teléfono (con formato)</span>
-            <input type="text" value={config.telefono} onChange={e => set('telefono', e.target.value)} style={inputStyle} placeholder="+54 9 3515 50-4248" />
-          </label>
-          <label className="luka-field">
-            <span>WhatsApp (solo números, ej: 5493515504248)</span>
-            <input type="text" value={config.whatsapp} onChange={e => set('whatsapp', e.target.value)} style={inputStyle} placeholder="5493515504248" />
-          </label>
-          <label className="luka-field">
-            <span>Horario de atención</span>
-            <input type="text" value={config.horario} onChange={e => set('horario', e.target.value)} style={inputStyle} placeholder="Lun–Vie 9–18hs" />
-          </label>
-        </div>
-
-        <div style={{ display: 'flex', gap: 12, alignItems: 'center' }}>
-          <button type="submit" disabled={saving} className="luka-cta-dark" style={{ opacity: saving ? 0.7 : 1 }}>
-            {saving ? 'Guardando…' : 'Guardar cambios'}
-          </button>
-          {saved && <span style={{ fontSize: 13, color: '#155724', display: 'flex', alignItems: 'center', gap: 4 }}><Icon.Check s={14} /> Guardado</span>}
-        </div>
-      </form>
-
-      {source === 'local' && (
-        <div style={{ background: 'var(--cream-2)', borderRadius: 12, padding: '14px 18px', fontSize: 12, color: 'var(--muted)' }}>
-          Para guardar la config en la base de datos, ejecutá en Supabase SQL Editor:
-          <pre style={{ background: 'var(--bg)', borderRadius: 8, padding: 12, marginTop: 8, fontSize: 11, overflow: 'auto' }}>{`CREATE TABLE IF NOT EXISTS configuracion (
+  const SQL_SETUP = `-- 1. Tabla configuracion
+CREATE TABLE IF NOT EXISTS configuracion (
   clave text PRIMARY KEY,
   valor text NOT NULL DEFAULT ''
 );
 ALTER TABLE configuracion ENABLE ROW LEVEL SECURITY;
-CREATE POLICY "Admin full access" ON configuracion
-  USING (EXISTS (
-    SELECT 1 FROM profiles WHERE id = auth.uid() AND role = 'admin'
-  ));`}</pre>
+CREATE POLICY "Admin lee config" ON configuracion
+  FOR SELECT USING (
+    EXISTS (SELECT 1 FROM profiles WHERE id = auth.uid() AND role = 'admin')
+  );
+CREATE POLICY "Admin edita config" ON configuracion
+  FOR ALL USING (
+    EXISTS (SELECT 1 FROM profiles WHERE id = auth.uid() AND role = 'admin')
+  );
+
+-- 2. Columna imagen en productos
+ALTER TABLE productos ADD COLUMN IF NOT EXISTS imagen_url text;
+
+-- 3. RLS: admin puede escribir en productos
+CREATE POLICY "Admin gestiona productos" ON productos
+  FOR ALL USING (
+    EXISTS (SELECT 1 FROM profiles WHERE id = auth.uid() AND role = 'admin')
+  );
+
+-- 4. RLS: admin puede escribir en categorias
+CREATE POLICY "Admin gestiona categorias" ON categorias
+  FOR ALL USING (
+    EXISTS (SELECT 1 FROM profiles WHERE id = auth.uid() AND role = 'admin')
+  );
+
+-- 5. Tabla profiles con email y fecha
+ALTER TABLE profiles ADD COLUMN IF NOT EXISTS email text;
+ALTER TABLE profiles ADD COLUMN IF NOT EXISTS created_at timestamptz DEFAULT now();
+
+-- 6. Trigger actualizado (copia email al registrarse)
+CREATE OR REPLACE FUNCTION public.handle_new_user()
+RETURNS trigger LANGUAGE plpgsql SECURITY DEFINER AS $$
+BEGIN
+  INSERT INTO public.profiles (id, role, email, created_at)
+  VALUES (new.id, 'cliente', new.email, now())
+  ON CONFLICT (id) DO NOTHING;
+  RETURN new;
+END;
+$$;
+
+-- 7. Dar rol admin al usuario administrador
+UPDATE profiles SET role = 'admin'
+WHERE id = (SELECT id FROM auth.users WHERE email = 'marcelolascano2020@gmail.com');
+
+-- 8. Bucket de storage (hacer esto en Dashboard → Storage)
+-- Crear bucket público llamado: productos`;
+
+  return (
+    <div>
+      <h2 style={{ margin: '0 0 24px', fontSize: 22, fontWeight: 800 }}>Configuración</h2>
+
+      {/* Tabs */}
+      <div style={{ display: 'flex', gap: 8, marginBottom: 24 }}>
+        {[['config', 'Datos del negocio'], ['sql', 'Setup SQL / Base de datos']].map(([k, l]) => (
+          <button
+            key={k}
+            onClick={() => setTab(k)}
+            style={{
+              padding: '9px 18px', borderRadius: 10, fontSize: 13, fontWeight: 700, cursor: 'pointer',
+              border: tab === k ? '2px solid #2b1f14' : '2px solid #e0d8d0',
+              background: tab === k ? '#2b1f14' : 'transparent',
+              color: tab === k ? '#FCEFA8' : '#2b1f14',
+            }}
+          >{l}</button>
+        ))}
+      </div>
+
+      {tab === 'config' && (
+        <form onSubmit={handleSave}>
+          <div style={{ background: '#fff', borderRadius: 16, border: '1px solid #e8e0d8', padding: 24, display: 'flex', flexDirection: 'column', gap: 20 }}>
+            {/* Storage indicator */}
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 12, color: useDb ? '#155724' : '#856404', background: useDb ? '#f0faf0' : '#fff8e1', border: `1px solid ${useDb ? '#c3e6cb' : '#ffc107'}`, borderRadius: 8, padding: '8px 12px' }}>
+              {useDb ? <Icon.Check s={13} /> : <Icon.Settings s={13} />}
+              {useDb ? 'Guardado en Supabase (tabla configuracion)' : 'Guardado en localStorage. Ejecutá el SQL del tab "Setup" para usar la base de datos.'}
+            </div>
+
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: 16 }}>
+              <div style={fld}>
+                <span style={lbl}>Nombre del negocio</span>
+                <input type="text" style={inp} value={config.nombre_negocio} onChange={e => set('nombre_negocio', e.target.value)} />
+              </div>
+              <div style={fld}>
+                <span style={lbl}>Descripción</span>
+                <input type="text" style={inp} value={config.descripcion} onChange={e => set('descripcion', e.target.value)} />
+              </div>
+              <div style={fld}>
+                <span style={lbl}>Dirección</span>
+                <input type="text" style={inp} value={config.direccion} onChange={e => set('direccion', e.target.value)} />
+              </div>
+              <div style={fld}>
+                <span style={lbl}>Teléfono (mostrado en el sitio)</span>
+                <input type="text" style={inp} value={config.telefono} onChange={e => set('telefono', e.target.value)} placeholder="+54 9 3515 50-4248" />
+              </div>
+              <div style={fld}>
+                <span style={lbl}>WhatsApp (solo números)</span>
+                <input type="text" style={inp} value={config.whatsapp} onChange={e => set('whatsapp', e.target.value)} placeholder="5493515504248" />
+              </div>
+              <div style={fld}>
+                <span style={lbl}>Horario de atención</span>
+                <input type="text" style={inp} value={config.horario} onChange={e => set('horario', e.target.value)} placeholder="Lun–Vie 9–18hs" />
+              </div>
+            </div>
+
+            <div style={{ display: 'flex', gap: 12, alignItems: 'center' }}>
+              <button type="submit" disabled={saving} style={{ padding: '11px 24px', borderRadius: 10, border: 'none', background: '#2b1f14', color: '#FCEFA8', fontSize: 14, fontWeight: 700, cursor: 'pointer', opacity: saving ? 0.7 : 1, display: 'inline-flex', alignItems: 'center', gap: 8 }}>
+                {saving ? 'Guardando…' : 'Guardar cambios'}
+              </button>
+              {saved && (
+                <span style={{ fontSize: 13, color: '#155724', display: 'flex', alignItems: 'center', gap: 5 }}>
+                  <Icon.Check s={14} /> Guardado
+                </span>
+              )}
+            </div>
+          </div>
+        </form>
+      )}
+
+      {tab === 'sql' && (
+        <div style={{ background: '#fff', borderRadius: 16, border: '1px solid #e8e0d8', padding: 24 }}>
+          <p style={{ margin: '0 0 14px', fontSize: 14, color: '#555' }}>
+            Copiá y ejecutá este SQL en <strong>Supabase → SQL Editor</strong> para configurar la base de datos completa del panel admin:
+          </p>
+          <div style={{ position: 'relative' }}>
+            <pre style={{
+              background: '#1e1e2e', color: '#cdd6f4', borderRadius: 12,
+              padding: '18px 20px', fontSize: 12, lineHeight: 1.6,
+              overflowX: 'auto', margin: 0, whiteSpace: 'pre-wrap',
+            }}>
+              {SQL_SETUP}
+            </pre>
+            <button
+              onClick={() => navigator.clipboard.writeText(SQL_SETUP)}
+              style={{
+                position: 'absolute', top: 12, right: 12,
+                padding: '6px 12px', borderRadius: 8, border: '1px solid rgba(255,255,255,0.2)',
+                background: 'rgba(255,255,255,0.1)', color: '#cdd6f4',
+                fontSize: 12, fontWeight: 600, cursor: 'pointer',
+              }}
+            >
+              Copiar
+            </button>
+          </div>
+          <div style={{ marginTop: 16, background: '#f7f4f0', borderRadius: 12, padding: '12px 16px', fontSize: 12, color: '#666' }}>
+            <strong>Notas:</strong>
+            <ul style={{ margin: '6px 0 0', paddingLeft: 20, lineHeight: 1.7 }}>
+              <li>El bucket de Storage "productos" se crea desde Supabase Dashboard → Storage → New bucket (marcarlo como público).</li>
+              <li>Después de ejecutar el SQL, recargá el panel admin.</li>
+              <li>Si ya tenés las tablas, algunos <code>CREATE TABLE IF NOT EXISTS</code> van a omitirse sin error.</li>
+            </ul>
+          </div>
         </div>
       )}
     </div>

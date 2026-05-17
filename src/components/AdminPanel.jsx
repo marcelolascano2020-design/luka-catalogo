@@ -3,141 +3,164 @@ import { useNavigate } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../hooks/useAuth';
 import { Icon } from './Icons';
-import AdminProducts from './admin/AdminProducts';
-import AdminCategories from './admin/AdminCategories';
-import AdminClients from './admin/AdminClients';
-import AdminSettings from './admin/AdminSettings';
+import AdminProducts    from './admin/AdminProducts';
+import AdminCategories  from './admin/AdminCategories';
+import AdminClients     from './admin/AdminClients';
+import AdminSettings    from './admin/AdminSettings';
 
-// ─── Login ────────────────────────────────────────────────────────────────────
+// ─── Login ─────────────────────────────────────────────────────────────────────
 function LoginForm() {
-  const [email, setEmail] = useState('');
+  const [email, setEmail]       = useState('');
   const [password, setPassword] = useState('');
-  const [error, setError] = useState('');
-  const [loading, setLoading] = useState(false);
+  const [error, setError]       = useState('');
+  const [busy, setBusy]         = useState(false);
 
-  const handleSubmit = async (e) => {
+  const submit = async (e) => {
     e.preventDefault();
-    setLoading(true);
+    setBusy(true);
     setError('');
     const { error: err } = await supabase.auth.signInWithPassword({ email, password });
     if (err) setError(err.message);
-    setLoading(false);
+    setBusy(false);
+  };
+
+  const inp = {
+    padding: '11px 14px', border: '1.5px solid #e0d8d0', borderRadius: 10,
+    fontSize: 15, background: '#faf8f5', color: '#2b1f14',
+    width: '100%', boxSizing: 'border-box', outline: 'none',
   };
 
   return (
-    <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'var(--bg)' }}>
-      <div style={{ background: 'var(--paper)', borderRadius: 20, padding: '40px 36px', width: 'min(400px, 92vw)', boxShadow: '0 20px 60px -20px rgba(43,31,20,0.2)' }}>
+    <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#faf8f5' }}>
+      <div style={{ background: '#fff', borderRadius: 20, padding: '40px 36px', width: 'min(400px, 92vw)', boxShadow: '0 20px 60px rgba(43,31,20,0.15)' }}>
         <div style={{ marginBottom: 28 }}>
-          <div className="luka-eyebrow">Panel de administración</div>
-          <h2 style={{ marginTop: 8 }}>Ingresá a Luka</h2>
+          <img src="/assets/logo.jpg" alt="Luka" style={{ width: 48, height: 48, borderRadius: 12, objectFit: 'contain', marginBottom: 16 }} />
+          <div style={{ fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.08em', color: '#aaa', marginBottom: 4 }}>Panel de administración</div>
+          <h2 style={{ margin: 0, fontSize: 24, fontWeight: 800 }}>Ingresá a Luka</h2>
         </div>
-        <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-          <label className="luka-field">
-            <span>Email</span>
-            <input type="email" value={email} onChange={e => setEmail(e.target.value)} required autoFocus
-              style={{ padding: '10px 12px', border: '1px solid var(--line-2)', borderRadius: 10, background: 'var(--bg)', fontSize: 14, color: 'var(--ink)', width: '100%', boxSizing: 'border-box' }} />
-          </label>
-          <label className="luka-field">
-            <span>Contraseña</span>
-            <input type="password" value={password} onChange={e => setPassword(e.target.value)} required
-              style={{ padding: '10px 12px', border: '1px solid var(--line-2)', borderRadius: 10, background: 'var(--bg)', fontSize: 14, color: 'var(--ink)', width: '100%', boxSizing: 'border-box' }} />
-          </label>
-          {error && <p style={{ color: '#c0392b', fontSize: 13, margin: 0 }}>{error}</p>}
-          <button type="submit" disabled={loading} className="luka-cta-dark"
-            style={{ width: '100%', justifyContent: 'center', marginTop: 4, opacity: loading ? 0.7 : 1 }}>
-            {loading ? 'Ingresando…' : 'Ingresar'}
+
+        <form onSubmit={submit} style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+            <label style={{ fontSize: 12, fontWeight: 700, color: '#555', textTransform: 'uppercase', letterSpacing: '0.04em' }}>Email</label>
+            <input type="email" value={email} onChange={e => setEmail(e.target.value)} required autoFocus style={inp} placeholder="admin@email.com" />
+          </div>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+            <label style={{ fontSize: 12, fontWeight: 700, color: '#555', textTransform: 'uppercase', letterSpacing: '0.04em' }}>Contraseña</label>
+            <input type="password" value={password} onChange={e => setPassword(e.target.value)} required style={inp} />
+          </div>
+
+          {error && (
+            <div style={{ background: '#fdf0f0', border: '1px solid #f5c6c6', borderRadius: 10, padding: '10px 14px', color: '#c0392b', fontSize: 13 }}>
+              {error}
+            </div>
+          )}
+
+          <button type="submit" disabled={busy} style={{
+            padding: '13px', borderRadius: 10, border: 'none',
+            background: busy ? '#888' : '#2b1f14', color: '#FCEFA8',
+            fontSize: 15, fontWeight: 800, cursor: busy ? 'default' : 'pointer', marginTop: 4,
+          }}>
+            {busy ? 'Ingresando…' : 'Ingresar'}
           </button>
         </form>
-        <div style={{ marginTop: 20, textAlign: 'center' }}>
-          <a href="/" style={{ fontSize: 13, color: 'var(--muted)' }}>← Volver al catálogo</a>
+
+        <div style={{ textAlign: 'center', marginTop: 20 }}>
+          <a href="/" style={{ fontSize: 13, color: '#aaa', textDecoration: 'none' }}>← Ver catálogo</a>
         </div>
       </div>
     </div>
   );
 }
 
-// ─── Sidebar nav items ────────────────────────────────────────────────────────
+// ─── Nav items ──────────────────────────────────────────────────────────────────
 const NAV = [
-  { key: 'productos',    label: 'Productos',    Icon: Icon.Package  },
-  { key: 'categorias',   label: 'Categorías',   Icon: Icon.Tag      },
-  { key: 'clientes',     label: 'Clientes',     Icon: Icon.Users    },
-  { key: 'configuracion',label: 'Configuración',Icon: Icon.Settings },
+  { key: 'productos',     label: 'Productos',     Ico: Icon.Package  },
+  { key: 'categorias',    label: 'Categorías',    Ico: Icon.Tag      },
+  { key: 'clientes',      label: 'Clientes',      Ico: Icon.Users    },
+  { key: 'configuracion', label: 'Configuración', Ico: Icon.Settings },
 ];
 
-function Sidebar({ tab, setTab, open, onClose }) {
+// ─── Sidebar ────────────────────────────────────────────────────────────────────
+function Sidebar({ tab, setTab, mobile, onClose }) {
   return (
     <>
-      {/* Mobile overlay */}
-      {open && (
-        <div
-          onClick={onClose}
-          style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.4)', zIndex: 49 }}
-        />
+      {mobile && (
+        <div onClick={onClose} style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.45)', zIndex: 49 }} />
       )}
-
-      <nav style={{
-        position: 'fixed', top: 0, left: 0, bottom: 0,
-        width: 220, background: 'var(--ink)', color: '#FCEFA8',
-        display: 'flex', flexDirection: 'column',
-        zIndex: 50, transition: 'transform 0.22s ease',
-        transform: open ? 'translateX(0)' : undefined,
-        // On desktop always visible; on mobile slide in/out
-      }} className="admin-sidebar">
-        <div style={{ padding: '20px 20px 16px', borderBottom: '1px solid rgba(252,239,168,0.1)' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-            <img src="/assets/logo.jpg" alt="Luka" style={{ width: 34, height: 34, borderRadius: 8, objectFit: 'contain' }} />
-            <div>
-              <div style={{ fontFamily: 'Outfit', fontWeight: 800, fontSize: 16 }}>Luka Admin</div>
-              <div style={{ fontSize: 10, opacity: 0.6, textTransform: 'uppercase', letterSpacing: '0.06em' }}>Panel de gestión</div>
-            </div>
+      <aside style={{
+        position: 'fixed', top: 0, left: 0, bottom: 0, width: 230,
+        background: '#2b1f14', color: '#FCEFA8',
+        display: 'flex', flexDirection: 'column', zIndex: 50,
+        transform: mobile ? 'translateX(0)' : undefined,
+      }}>
+        {/* Logo */}
+        <div style={{ padding: '20px 20px 16px', borderBottom: '1px solid rgba(252,239,168,0.1)', display: 'flex', alignItems: 'center', gap: 12 }}>
+          <img src="/assets/logo.jpg" alt="Luka" style={{ width: 36, height: 36, borderRadius: 9, objectFit: 'contain', flexShrink: 0 }} />
+          <div>
+            <div style={{ fontWeight: 800, fontSize: 17, letterSpacing: '-0.02em' }}>Luka Admin</div>
+            <div style={{ fontSize: 10, opacity: 0.5, textTransform: 'uppercase', letterSpacing: '0.07em' }}>Panel de gestión</div>
           </div>
         </div>
 
-        <div style={{ flex: 1, padding: '12px 10px', display: 'flex', flexDirection: 'column', gap: 4 }}>
-          {NAV.map(({ key, label, Icon: NavIcon }) => (
+        {/* Nav */}
+        <nav style={{ flex: 1, padding: '12px 10px', display: 'flex', flexDirection: 'column', gap: 2 }}>
+          {NAV.map(({ key, label, Ico }) => (
             <button
               key={key}
-              onClick={() => { setTab(key); onClose(); }}
+              onClick={() => { setTab(key); if (mobile) onClose(); }}
               style={{
-                display: 'flex', alignItems: 'center', gap: 10,
-                padding: '10px 12px', borderRadius: 10, border: 'none', cursor: 'pointer',
-                background: tab === key ? 'rgba(252,239,168,0.12)' : 'transparent',
-                color: tab === key ? '#FCEFA8' : 'rgba(252,239,168,0.55)',
+                display: 'flex', alignItems: 'center', gap: 11,
+                padding: '10px 13px', borderRadius: 10, border: 'none', cursor: 'pointer',
+                background: tab === key ? 'rgba(252,239,168,0.14)' : 'transparent',
+                color: tab === key ? '#FCEFA8' : 'rgba(252,239,168,0.5)',
                 fontSize: 14, fontWeight: tab === key ? 700 : 500, textAlign: 'left',
-                transition: 'all 0.15s',
               }}
             >
-              <NavIcon s={17} />
+              <Ico s={17} />
               {label}
             </button>
           ))}
-        </div>
+        </nav>
 
-        <div style={{ padding: '12px 10px', borderTop: '1px solid rgba(252,239,168,0.1)', display: 'flex', flexDirection: 'column', gap: 6 }}>
-          <a href="/" style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '9px 12px', borderRadius: 10, color: 'rgba(252,239,168,0.55)', fontSize: 13, textDecoration: 'none' }}>
-            <Icon.Arrow s={14} style={{ transform: 'rotate(180deg)' }} /> Ver catálogo
+        {/* Footer */}
+        <div style={{ padding: '10px 10px 16px', borderTop: '1px solid rgba(252,239,168,0.1)', display: 'flex', flexDirection: 'column', gap: 2 }}>
+          <a
+            href="/"
+            style={{ display: 'flex', alignItems: 'center', gap: 11, padding: '10px 13px', borderRadius: 10, color: 'rgba(252,239,168,0.45)', fontSize: 13, textDecoration: 'none' }}
+          >
+            <Icon.Arrow s={14} style={{ transform: 'scaleX(-1)' }} /> Ver catálogo
           </a>
           <button
             onClick={() => supabase.auth.signOut()}
-            style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '9px 12px', borderRadius: 10, border: 'none', background: 'transparent', color: 'rgba(252,239,168,0.55)', fontSize: 13, cursor: 'pointer', textAlign: 'left' }}
+            style={{ display: 'flex', alignItems: 'center', gap: 11, padding: '10px 13px', borderRadius: 10, border: 'none', background: 'transparent', color: 'rgba(252,239,168,0.45)', fontSize: 13, cursor: 'pointer' }}
           >
             <Icon.Close s={14} /> Cerrar sesión
           </button>
         </div>
-      </nav>
+      </aside>
     </>
   );
 }
 
-// ─── Main AdminPanel ──────────────────────────────────────────────────────────
+// ─── Main ──────────────────────────────────────────────────────────────────────
+const SIDEBAR_W = 230;
+
 export default function AdminPanel() {
   const { session, role, loading } = useAuth();
   const navigate = useNavigate();
-  const [tab, setTab] = useState('productos');
-  const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [tab, setTab]             = useState('productos');
+  const [mobileSidebar, setMobile] = useState(false);
+  const [isMobile, setIsMobile]   = useState(window.innerWidth < 769);
 
+  // Track viewport width to toggle sidebar behaviour
   useEffect(() => {
-    // Only redirect after auth resolves AND role is known (not null)
+    const handler = () => setIsMobile(window.innerWidth < 769);
+    window.addEventListener('resize', handler);
+    return () => window.removeEventListener('resize', handler);
+  }, []);
+
+  // Auth guard: wait until role is resolved, then redirect non-admins
+  useEffect(() => {
     if (!loading && session && role !== null && role !== 'admin') {
       navigate('/', { replace: true });
     }
@@ -145,67 +168,62 @@ export default function AdminPanel() {
 
   if (loading) {
     return (
-      <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'var(--bg)' }}>
-        <div style={{ textAlign: 'center', color: 'var(--muted)' }}>Cargando…</div>
+      <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#faf8f5' }}>
+        <span style={{ color: '#aaa', fontSize: 14 }}>Cargando…</span>
       </div>
     );
   }
-
   if (!session) return <LoginForm />;
   if (role === null || role !== 'admin') return null;
 
-  const TAB_COMPONENTS = {
+  const CONTENT = {
     productos:     <AdminProducts />,
     categorias:    <AdminCategories />,
     clientes:      <AdminClients />,
     configuracion: <AdminSettings />,
   };
 
+  const showSidebar = !isMobile || mobileSidebar;
+
   return (
-    <>
-      <style>{`
-        @media (min-width: 769px) {
-          .admin-sidebar { transform: none !important; }
-          .admin-content { margin-left: 220px; }
-        }
-        @media (max-width: 768px) {
-          .admin-sidebar { transform: translateX(-100%); }
-          .admin-sidebar.open { transform: translateX(0); }
-          .admin-content { margin-left: 0; }
-        }
-      `}</style>
+    <div style={{ minHeight: '100vh', background: '#f5f0ea', fontFamily: 'inherit' }}>
+      {showSidebar && (
+        <Sidebar
+          tab={tab}
+          setTab={setTab}
+          mobile={isMobile}
+          onClose={() => setMobile(false)}
+        />
+      )}
 
-      <div style={{ minHeight: '100vh', background: 'var(--bg)' }}>
-        <Sidebar tab={tab} setTab={setTab} open={sidebarOpen} onClose={() => setSidebarOpen(false)} />
-
-        <div className="admin-content" style={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
-          {/* Top bar (mobile only / page header) */}
-          <header style={{
-            position: 'sticky', top: 0, zIndex: 40,
-            background: 'var(--paper)', borderBottom: '1px solid var(--line)',
-            padding: '12px 20px', display: 'flex', alignItems: 'center', gap: 14,
-          }}>
+      {/* Main column */}
+      <div style={{ marginLeft: isMobile ? 0 : SIDEBAR_W, display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
+        {/* Top bar */}
+        <header style={{
+          position: 'sticky', top: 0, zIndex: 40,
+          background: '#fff', borderBottom: '1px solid #e8e0d8',
+          padding: '0 24px', height: 58,
+          display: 'flex', alignItems: 'center', gap: 14,
+        }}>
+          {isMobile && (
             <button
-              className="admin-hamburger"
-              onClick={() => setSidebarOpen(o => !o)}
-              style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--ink)', padding: 4, display: 'none' }}
+              onClick={() => setMobile(o => !o)}
+              style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#2b1f14', padding: 4, flexShrink: 0 }}
             >
               <Icon.Menu s={22} />
             </button>
-            <style>{`.admin-hamburger { display: none; } @media (max-width: 768px) { .admin-hamburger { display: block !important; } }`}</style>
+          )}
+          <div style={{ flex: 1, minWidth: 0 }}>
+            <div style={{ fontWeight: 800, fontSize: 16, lineHeight: 1 }}>{NAV.find(n => n.key === tab)?.label}</div>
+            <div style={{ fontSize: 11, color: '#aaa', marginTop: 2 }}>Luka · Panel de administración</div>
+          </div>
+        </header>
 
-            <div>
-              <div style={{ fontWeight: 700, fontSize: 16 }}>{NAV.find(n => n.key === tab)?.label}</div>
-              <div style={{ fontSize: 11, color: 'var(--muted)' }}>Panel de administración · Luka</div>
-            </div>
-          </header>
-
-          {/* Content */}
-          <main style={{ flex: 1, padding: '28px 24px', maxWidth: 1100, width: '100%', boxSizing: 'border-box' }}>
-            {TAB_COMPONENTS[tab]}
-          </main>
-        </div>
+        {/* Page content */}
+        <main style={{ flex: 1, padding: '28px 24px', maxWidth: 1080, width: '100%', boxSizing: 'border-box' }}>
+          {CONTENT[tab]}
+        </main>
       </div>
-    </>
+    </div>
   );
 }
