@@ -116,7 +116,14 @@ function ProductForm({ initial, categorias, onSave, onClose }) {
     }
 
     if (dbError) {
-      setError(`Error al guardar: ${dbError.message}`);
+      const isRLS = dbError.message?.toLowerCase().includes('row-level security')
+        || dbError.message?.toLowerCase().includes('permission')
+        || dbError.message?.toLowerCase().includes('policy')
+        || dbError.code === '42501';
+      setError(isRLS
+        ? '⛔ Sin permiso de escritura (RLS). Ejecutá el SQL del diagnóstico que aparece arriba del panel.'
+        : `Error al guardar: ${dbError.message}`
+      );
       setSaving(false);
       return;
     }

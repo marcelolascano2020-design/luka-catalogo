@@ -7,6 +7,7 @@ import AdminProducts    from './admin/AdminProducts';
 import AdminCategories  from './admin/AdminCategories';
 import AdminClients     from './admin/AdminClients';
 import AdminSettings    from './admin/AdminSettings';
+import SetupChecker     from './admin/SetupChecker';
 
 // ─── Login ─────────────────────────────────────────────────────────────────────
 function LoginForm() {
@@ -221,6 +222,7 @@ export default function AdminPanel() {
 
         {/* Page content */}
         <main style={{ flex: 1, padding: '28px 24px', maxWidth: 1080, width: '100%', boxSizing: 'border-box' }}>
+          <SetupChecker />
           {CONTENT[tab]}
         </main>
       </div>

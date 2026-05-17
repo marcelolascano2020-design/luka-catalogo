@@ -49,13 +49,22 @@ export default function AdminCategories() {
     setLoading(false);
   };
 
+  const rlsMsg = (e) => {
+    const isRLS = e?.message?.toLowerCase().includes('row-level security')
+      || e?.message?.toLowerCase().includes('permission')
+      || e?.code === '42501';
+    return isRLS
+      ? '⛔ Sin permiso de escritura (RLS). Ejecutá el SQL del diagnóstico que aparece arriba del panel.'
+      : e?.message;
+  };
+
   const add = async (e) => {
     e.preventDefault();
     if (!nombre.trim()) return;
     setAdding(true);
     const maxOrden = cats.length ? Math.max(...cats.map(c => c.orden || 0)) : 0;
     const { error: e2 } = await supabase.from('categorias').insert({ nombre: nombre.trim(), emoji: emoji.trim(), orden: maxOrden + 1, activa: true });
-    if (e2) { setError(e2.message); setAdding(false); return; }
+    if (e2) { setError(rlsMsg(e2)); setAdding(false); return; }
     setNombre(''); setEmoji('');
     fetchAll();
     setAdding(false);
@@ -65,14 +74,14 @@ export default function AdminCategories() {
 
   const saveEdit = async (id) => {
     const { error: e } = await supabase.from('categorias').update({ nombre: editNombre.trim(), emoji: editEmoji.trim() }).eq('id', id);
-    if (e) { setError(e.message); return; }
+    if (e) { setError(rlsMsg(e)); return; }
     setEditId(null);
     fetchAll();
   };
 
   const del = async (id) => {
     const { error: e } = await supabase.from('categorias').delete().eq('id', id);
-    if (e) { setError(e.message); } else { setConfirmId(null); fetchAll(); }
+    if (e) { setError(rlsMsg(e)); } else { setConfirmId(null); fetchAll(); }
   };
 
   const swapOrder = async (i, dir) => {
