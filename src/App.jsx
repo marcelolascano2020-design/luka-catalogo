@@ -10,7 +10,7 @@ import Footer from './components/Footer';
 import AdminPanel from './components/AdminPanel';
 import { Icon } from './components/Icons';
 import { CATEGORIAS as STATIC_CATS, PRODUCTOS as STATIC_PRODS } from './data/productos';
-import { supabase } from './lib/supabase';
+import { supabase, supabaseReady } from './lib/supabase';
 
 const WA_PHONE = import.meta.env.VITE_WHATSAPP_NUMBER || "5493515504248";
 
@@ -64,18 +64,20 @@ function Catalog() {
   // Load from Supabase; fall back to static data
   useEffect(() => {
     const load = async () => {
-      try {
-        const [{ data: prods, error: e1 }, { data: dbCats, error: e2 }] = await Promise.all([
-          supabase.from('productos').select('*, categorias(nombre)').eq('activo', true).order('id'),
-          supabase.from('categorias').select('*').eq('activa', true).order('orden'),
-        ]);
-        if (!e1 && !e2 && prods && dbCats) {
-          setProducts(prods.map(normalizeProduct));
-          setCats(dbCats.map(normalizeCategory));
-          setFromSupabase(true);
-          return;
-        }
-      } catch (_) {}
+      if (supabaseReady) {
+        try {
+          const [{ data: prods, error: e1 }, { data: dbCats, error: e2 }] = await Promise.all([
+            supabase.from('productos').select('*, categorias(nombre)').eq('activo', true).order('id'),
+            supabase.from('categorias').select('*').eq('activa', true).order('orden'),
+          ]);
+          if (!e1 && !e2 && prods && dbCats) {
+            setProducts(prods.map(normalizeProduct));
+            setCats(dbCats.map(normalizeCategory));
+            setFromSupabase(true);
+            return;
+          }
+        } catch (_) {}
+      }
       // Fallback to static
       setProducts(STATIC_PRODS);
       setCats(STATIC_CATS);
