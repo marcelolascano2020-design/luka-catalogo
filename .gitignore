@@ -1,3 +1,6 @@
+# Env — never commit secrets
+.env
+
 # Logs
 logs
 *.log
