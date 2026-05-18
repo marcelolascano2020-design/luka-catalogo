@@ -23,22 +23,23 @@ const LAYOUTS = [
 // Normaliza un producto de Supabase al mismo shape que los estáticos
 function normalizeProduct(p) {
   return {
-    id:    String(p.id),
-    cat:   p.categorias?.nombre?.toLowerCase().replace(/\s+/g, '-') || 'general',
-    pet:   'Varios',
-    name:  p.nombre,
-    brand: p.marca || '',
-    size:  p.unidad || '',
-    tags:  [],
-    desc:  p.descripcion || '',
+    id:     String(p.id),
+    cat:    String(p.categoria_id ?? ''),   // usa el ID numérico para que coincida con normalizeCategory
+    pet:    p.mascota || 'Varios',
+    name:   p.nombre,
+    brand:  p.marca || '',
+    size:   p.unidad || '',
+    tags:   [],
+    desc:   p.descripcion || '',
     precio: p.precio,
     activo: p.activo,
+    imagen_url: p.imagen_url || null,
   };
 }
 
 function normalizeCategory(c) {
   return {
-    id:    String(c.id),
+    id:    String(c.id),   // mismo que normalizeProduct usa para p.cat
     label: c.nombre,
     short: c.emoji || '',
   };

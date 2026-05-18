@@ -56,7 +56,14 @@ function Modal({ title, onClose, children, wide }) {
 }
 
 // ─── Product Form ──────────────────────────────────────────────────────────────
-const EMPTY = { nombre: '', descripcion: '', marca: '', precio: '', unidad: '', categoria_id: '', activo: true, destacado: false };
+const EMPTY = { nombre: '', descripcion: '', marca: '', precio: '', unidad: '', categoria_id: '', mascota: 'Varios', activo: true, destacado: false };
+// Valores deben coincidir con el filtro de CategoryFilter y con los datos estáticos
+const MASCOTAS = [
+  { value: 'Perro',  label: 'Perros'  },
+  { value: 'Gato',   label: 'Gatos'   },
+  { value: 'Ave',    label: 'Aves'    },
+  { value: 'Varios', label: 'Varios'  },
+];
 
 function ProductForm({ initial, categorias, onSave, onClose }) {
   const [form, setForm] = useState(() => initial ? { ...EMPTY, ...initial, precio: initial.precio ?? '' } : EMPTY);
@@ -99,6 +106,7 @@ function ProductForm({ initial, categorias, onSave, onClose }) {
       precio:       parseFloat(form.precio) || 0,
       unidad:       form.unidad.trim(),
       categoria_id: form.categoria_id ? parseInt(form.categoria_id) : null,
+      mascota:      form.mascota || 'Varios',
       activo:       !!form.activo,
       destacado:    !!form.destacado,
     };
@@ -158,8 +166,8 @@ function ProductForm({ initial, categorias, onSave, onClose }) {
         </div>
       </div>
 
-      {/* Precio + Categoría */}
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14 }}>
+      {/* Precio + Categoría + Mascota */}
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))', gap: 14 }}>
         <div style={field}>
           <span style={label}>Precio (ARS) *</span>
           <input style={input} type="number" step="1" min="0" value={form.precio} onChange={e => set('precio', e.target.value)} required placeholder="0" />
@@ -169,6 +177,12 @@ function ProductForm({ initial, categorias, onSave, onClose }) {
           <select style={input} value={form.categoria_id} onChange={e => set('categoria_id', e.target.value)}>
             <option value="">— Sin categoría —</option>
             {categorias.map(c => <option key={c.id} value={c.id}>{c.emoji ? `${c.emoji} ${c.nombre}` : c.nombre}</option>)}
+          </select>
+        </div>
+        <div style={field}>
+          <span style={label}>Mascota</span>
+          <select style={input} value={form.mascota} onChange={e => set('mascota', e.target.value)}>
+            {MASCOTAS.map(m => <option key={m.value} value={m.value}>{m.label}</option>)}
           </select>
         </div>
       </div>

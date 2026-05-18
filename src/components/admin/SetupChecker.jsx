@@ -6,8 +6,9 @@ const SQL = `-- ═════════════════════�
 -- EJECUTAR COMPLETO EN: Supabase → SQL Editor
 -- ═══════════════════════════════════════════════
 
--- 1. Columna de imagen en productos (si no existe)
+-- 1. Columnas nuevas en productos (si no existen)
 ALTER TABLE productos ADD COLUMN IF NOT EXISTS imagen_url text;
+ALTER TABLE productos ADD COLUMN IF NOT EXISTS mascota text DEFAULT 'Varios';
 
 -- 2. Quitar policies viejas que puedan interferir
 DROP POLICY IF EXISTS "Enable read access for all users" ON productos;
