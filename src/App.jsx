@@ -100,7 +100,7 @@ function Catalog() {
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();
     let list = products.filter(p => {
-      if (cat !== 'all' && p.cat !== cat) return false;
+      if (cat !== 'all' && p.cat !== cats.find(k => k.id == cat)?.label.toLowerCase().replace(/\s+/g, '-')) return false;
       if (pet !== 'all' && p.pet !== pet) return false;
       if (q && !(`${p.name} ${p.brand} ${p.tags?.join(' ')} ${p.desc}`.toLowerCase().includes(q))) return false;
       return true;
