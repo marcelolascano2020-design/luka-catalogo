@@ -17,6 +17,14 @@ function hashIdx(id) {
 export function ProductImage({ p, ratio = "4 / 3" }) {
   const [bg, fg] = PALETTE[hashIdx(p.id)];
   const label = `${p.brand} · ${p.size}`;
+  if (p.imagen_url) {
+    return (
+      <div className="luka-prod-img" style={{ aspectRatio: ratio }}>
+        <img src={p.imagen_url} alt={p.name}
+          style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+      </div>
+    );
+  }
   return (
     <div className="luka-prod-img" style={{ background: bg, aspectRatio: ratio }}>
       <svg className="luka-prod-stripes" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">
