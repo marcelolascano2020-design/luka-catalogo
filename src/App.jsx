@@ -33,6 +33,7 @@ function normalizeProduct(p) {
     desc:  p.descripcion || '',
     precio: p.precio,
     activo: p.activo,
+imagen_url: p.imagen_url || null,
   };
 }
 
