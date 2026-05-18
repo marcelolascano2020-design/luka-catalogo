@@ -130,7 +130,7 @@ function Catalog() {
 
   const counts = useMemo(() => {
     const c = { all: products.length };
-    for (const k of cats) c[k.id] = products.filter(p => p.cat === k.id).length;
+    for (const k of cats) c[k.id] = products.filter(p => p.cat === k.label.toLowerCase().replace(/\s+/g, '-')).length;
     return c;
   }, [products, cats]);
 
