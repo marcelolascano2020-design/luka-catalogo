@@ -25,7 +25,7 @@ function normalizeProduct(p) {
   return {
     id:    String(p.id),
     cat:   p.categorias?.nombre?.toLowerCase().replace(/\s+/g, '-') || 'general',
-    pet:   'Varios',
+    pet: p.categorias?.nombre?.toLowerCase().includes('gato') ? 'Gatos' : p.categorias?.nombre?.toLowerCase().includes('ave') ? 'Aves' : p.categorias?.nombre?.toLowerCase().includes('perro') ? 'Perros' : 'Varios',
     name:  p.nombre,
     brand: p.marca || '',
     size:  p.unidad || '',
