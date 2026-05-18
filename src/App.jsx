@@ -23,17 +23,17 @@ const LAYOUTS = [
 // Normaliza un producto de Supabase al mismo shape que los estáticos
 function normalizeProduct(p) {
   return {
-    id:     String(p.id),
-    cat:    String(p.categoria_id ?? ''),   // usa el ID numérico para que coincida con normalizeCategory
-    pet:    p.mascota || 'Varios',
-    name:   p.nombre,
-    brand:  p.marca || '',
-    size:   p.unidad || '',
-    tags:   [],
-    desc:   p.descripcion || '',
+    id:    String(p.id),
+    cat:   p.categorias?.nombre?.toLowerCase().replace(/\s+/g, '-') || 'general',
+    pet: p.categorias?.nombre?.toLowerCase().includes('gato') ? 'Gatos' : p.categorias?.nombre?.toLowerCase().includes('ave') ? 'Aves' : p.categorias?.nombre?.toLowerCase().includes('perro') ? 'Perros' : 'Varios',
+    name:  p.nombre,
+    brand: p.marca || '',
+    size:  p.unidad || '',
+    tags:  [],
+    desc:  p.descripcion || '',
     precio: p.precio,
     activo: p.activo,
-    imagen_url: p.imagen_url || null,
+imagen_url: p.imagen_url || null,
   };
 }
 
@@ -100,7 +100,7 @@ function Catalog() {
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();
     let list = products.filter(p => {
-      if (cat !== 'all' && p.cat !== cat) return false;
+      if (cat !== 'all' && p.cat !== cats.find(k => k.id == cat)?.label.toLowerCase().replace(/\s+/g, '-')) return false;
       if (pet !== 'all' && p.pet !== pet) return false;
       if (q && !(`${p.name} ${p.brand} ${p.tags?.join(' ')} ${p.desc}`.toLowerCase().includes(q))) return false;
       return true;
@@ -130,7 +130,7 @@ function Catalog() {
 
   const counts = useMemo(() => {
     const c = { all: products.length };
-    for (const k of cats) c[k.id] = products.filter(p => p.cat === k.id).length;
+    for (const k of cats) c[k.id] = products.filter(p => p.cat === k.label.toLowerCase().replace(/\s+/g, '-')).length;
     return c;
   }, [products, cats]);
 
