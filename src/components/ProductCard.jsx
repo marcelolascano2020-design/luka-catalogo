@@ -59,7 +59,8 @@ export default function ProductCard({ p, onAdd, layout }) {
           <span className="luka-dot">·</span>
           <span>{p.tags.slice(0, 2).join(' · ')}</span>
         </div>
-        {layout === 'list' && <p className="luka-card-desc">{p.desc}</p>}
+        {p.precio > 0 && <div className="luka-card-price">${p.precio.toLocaleString('es-AR')}</div>}
+{layout === 'list' && <p className="luka-card-desc">{p.desc}</p>}
         <button className="luka-add" onClick={() => onAdd(p)}>
           <Icon.Plus s={14} /> Sumar al pedido
         </button>
