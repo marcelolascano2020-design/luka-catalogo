@@ -83,7 +83,30 @@ CREATE POLICY "Users can read own profile"
 UPDATE profiles SET role = 'admin'
   WHERE id = (SELECT id FROM auth.users WHERE email = 'marcelolascano2020@gmail.com');
 
--- 11. Verificar que quedó bien
+-- 11. Columnas de perfil de cliente
+ALTER TABLE profiles ADD COLUMN IF NOT EXISTS nombre_completo   text;
+ALTER TABLE profiles ADD COLUMN IF NOT EXISTS celular           text;
+ALTER TABLE profiles ADD COLUMN IF NOT EXISTS barrio            text;
+ALTER TABLE profiles ADD COLUMN IF NOT EXISTS nombre_mascota    text;
+ALTER TABLE profiles ADD COLUMN IF NOT EXISTS edad_mascota      text;
+ALTER TABLE profiles ADD COLUMN IF NOT EXISTS juguete_preferido text;
+
+-- 12. Policy: el usuario puede actualizar su propio perfil
+DROP POLICY IF EXISTS "Users can update own profile" ON profiles;
+CREATE POLICY "Users can update own profile"
+  ON profiles FOR UPDATE
+  USING (auth.uid() = id);
+
+-- 13. Policy: admin puede leer TODOS los perfiles
+DROP POLICY IF EXISTS "Admin reads all profiles" ON profiles;
+CREATE POLICY "Admin reads all profiles"
+  ON profiles FOR SELECT
+  USING (
+    auth.uid() = id
+    OR EXISTS (SELECT 1 FROM profiles p2 WHERE p2.id = auth.uid() AND p2.role = 'admin')
+  );
+
+-- 14. Verificar que quedó bien
 SELECT u.email, p.role
   FROM auth.users u
   JOIN profiles p ON p.id = u.id
