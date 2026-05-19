@@ -54,11 +54,13 @@ function AuthModal({ onClose }) {
     const { data, error: authErr } = await supabase.auth.signUp({ email, password });
     if (authErr) { setError(authErr.message); setBusy(false); return; }
 
-    // Save profile fields if we got a user (works whether email confirm is on or off)
-    const userId = data?.user?.id;
-    if (userId) {
+    // Only upsert profile if the session is active (email confirm disabled).
+    // When email confirm is ON, data.session is null — upsert would run
+    // unauthenticated and be blocked by RLS. ProfileCompletionModal handles it
+    // on first login instead.
+    if (data?.session && data?.user?.id) {
       await supabase.from('profiles').upsert({
-        id:                userId,
+        id:                data.user.id,
         role:              'cliente',
         email,
         nombre_completo:   profile.nombre_completo.trim(),
@@ -257,15 +259,24 @@ function ProfileCompletionModal({ userId, onClose }) {
     e.preventDefault();
     setSaving(true);
     setError('');
-    const { error: err } = await supabase.from('profiles').update({
-      nombre_completo:   form.nombre_completo.trim(),
-      celular:           form.celular.trim(),
-      barrio:            form.barrio.trim(),
-      nombre_mascota:    form.nombre_mascota.trim(),
-      edad_mascota:      form.edad_mascota.trim(),
-      juguete_preferido: form.juguete_preferido.trim(),
-    }).eq('id', userId);
+    const { data: saved, error: err } = await supabase
+      .from('profiles')
+      .upsert({
+        id:                userId,
+        nombre_completo:   form.nombre_completo.trim(),
+        celular:           form.celular.trim(),
+        barrio:            form.barrio.trim(),
+        nombre_mascota:    form.nombre_mascota.trim(),
+        edad_mascota:      form.edad_mascota.trim(),
+        juguete_preferido: form.juguete_preferido.trim(),
+      }, { onConflict: 'id' })
+      .select('id');
     if (err) { setError(err.message); setSaving(false); return; }
+    if (!saved?.length) {
+      setError('No se pudo guardar el perfil. El admin necesita ejecutar el SQL de configuración (política "Users can update own profile").');
+      setSaving(false);
+      return;
+    }
     onClose();
   };
 

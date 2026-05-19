@@ -10,80 +10,8 @@ const SQL = `-- ═════════════════════�
 ALTER TABLE productos ADD COLUMN IF NOT EXISTS imagen_url text;
 ALTER TABLE productos ADD COLUMN IF NOT EXISTS mascota text DEFAULT 'Varios';
 
--- 2. Quitar policies viejas que puedan interferir
-DROP POLICY IF EXISTS "Enable read access for all users" ON productos;
-DROP POLICY IF EXISTS "Admin gestiona productos" ON productos;
-DROP POLICY IF EXISTS "Admin gestiona categorias" ON categorias;
-DROP POLICY IF EXISTS "Admin puede ver todos" ON productos;
-
--- 3. Policy: cualquiera puede LEER productos activos (catálogo público)
-CREATE POLICY "Lectura publica productos"
-  ON productos FOR SELECT
-  USING (activo = true);
-
--- 4. Policy: admin puede leer TODOS los productos (incluso inactivos)
-CREATE POLICY "Admin lee todos los productos"
-  ON productos FOR SELECT
-  USING (
-    EXISTS (SELECT 1 FROM profiles WHERE id = auth.uid() AND role = 'admin')
-  );
-
--- 5. Policy: admin puede INSERTAR productos
-CREATE POLICY "Admin inserta productos"
-  ON productos FOR INSERT
-  WITH CHECK (
-    EXISTS (SELECT 1 FROM profiles WHERE id = auth.uid() AND role = 'admin')
-  );
-
--- 6. Policy: admin puede ACTUALIZAR productos
-CREATE POLICY "Admin actualiza productos"
-  ON productos FOR UPDATE
-  USING (
-    EXISTS (SELECT 1 FROM profiles WHERE id = auth.uid() AND role = 'admin')
-  );
-
--- 7. Policy: admin puede ELIMINAR productos
-CREATE POLICY "Admin elimina productos"
-  ON productos FOR DELETE
-  USING (
-    EXISTS (SELECT 1 FROM profiles WHERE id = auth.uid() AND role = 'admin')
-  );
-
--- 8. Policy: admin gestiona categorías (INSERT, UPDATE, DELETE)
-DROP POLICY IF EXISTS "Admin inserta categorias" ON categorias;
-DROP POLICY IF EXISTS "Admin actualiza categorias" ON categorias;
-DROP POLICY IF EXISTS "Admin elimina categorias" ON categorias;
-
-CREATE POLICY "Admin inserta categorias"
-  ON categorias FOR INSERT
-  WITH CHECK (
-    EXISTS (SELECT 1 FROM profiles WHERE id = auth.uid() AND role = 'admin')
-  );
-
-CREATE POLICY "Admin actualiza categorias"
-  ON categorias FOR UPDATE
-  USING (
-    EXISTS (SELECT 1 FROM profiles WHERE id = auth.uid() AND role = 'admin')
-  );
-
-CREATE POLICY "Admin elimina categorias"
-  ON categorias FOR DELETE
-  USING (
-    EXISTS (SELECT 1 FROM profiles WHERE id = auth.uid() AND role = 'admin')
-  );
-
--- 9. Asegurarse de que profiles tiene RLS y el admin puede leerse a sí mismo
+-- 2. Columnas de perfil de cliente
 ALTER TABLE profiles ENABLE ROW LEVEL SECURITY;
-DROP POLICY IF EXISTS "Users can read own profile" ON profiles;
-CREATE POLICY "Users can read own profile"
-  ON profiles FOR SELECT
-  USING (auth.uid() = id);
-
--- 10. Dar rol admin (cambiá el email si es necesario)
-UPDATE profiles SET role = 'admin'
-  WHERE id = (SELECT id FROM auth.users WHERE email = 'marcelolascano2020@gmail.com');
-
--- 11. Columnas de perfil de cliente
 ALTER TABLE profiles ADD COLUMN IF NOT EXISTS nombre_completo   text;
 ALTER TABLE profiles ADD COLUMN IF NOT EXISTS celular           text;
 ALTER TABLE profiles ADD COLUMN IF NOT EXISTS barrio            text;
@@ -91,22 +19,76 @@ ALTER TABLE profiles ADD COLUMN IF NOT EXISTS nombre_mascota    text;
 ALTER TABLE profiles ADD COLUMN IF NOT EXISTS edad_mascota      text;
 ALTER TABLE profiles ADD COLUMN IF NOT EXISTS juguete_preferido text;
 
--- 12. Policy: el usuario puede actualizar su propio perfil
-DROP POLICY IF EXISTS "Users can update own profile" ON profiles;
-CREATE POLICY "Users can update own profile"
-  ON profiles FOR UPDATE
-  USING (auth.uid() = id);
-
--- 13. Policy: admin puede leer TODOS los perfiles
-DROP POLICY IF EXISTS "Admin reads all profiles" ON profiles;
-CREATE POLICY "Admin reads all profiles"
-  ON profiles FOR SELECT
-  USING (
-    auth.uid() = id
-    OR EXISTS (SELECT 1 FROM profiles p2 WHERE p2.id = auth.uid() AND p2.role = 'admin')
+-- 3. Función is_admin() — evita recursión en RLS al consultar profiles
+--    SECURITY DEFINER hace que corra como superuser, sin RLS.
+CREATE OR REPLACE FUNCTION is_admin()
+RETURNS boolean LANGUAGE sql SECURITY DEFINER STABLE AS $$
+  SELECT EXISTS (
+    SELECT 1 FROM profiles WHERE id = auth.uid() AND role = 'admin'
   );
+$$;
 
--- 14. Verificar que quedó bien
+-- 4. Quitar todas las policies viejas para empezar limpio
+DROP POLICY IF EXISTS "Enable read access for all users"  ON productos;
+DROP POLICY IF EXISTS "Admin gestiona productos"          ON productos;
+DROP POLICY IF EXISTS "Admin puede ver todos"             ON productos;
+DROP POLICY IF EXISTS "Lectura publica productos"         ON productos;
+DROP POLICY IF EXISTS "Admin lee todos los productos"     ON productos;
+DROP POLICY IF EXISTS "Admin inserta productos"           ON productos;
+DROP POLICY IF EXISTS "Admin actualiza productos"         ON productos;
+DROP POLICY IF EXISTS "Admin elimina productos"           ON productos;
+
+DROP POLICY IF EXISTS "Admin gestiona categorias"         ON categorias;
+DROP POLICY IF EXISTS "Admin inserta categorias"          ON categorias;
+DROP POLICY IF EXISTS "Admin actualiza categorias"        ON categorias;
+DROP POLICY IF EXISTS "Admin elimina categorias"          ON categorias;
+
+DROP POLICY IF EXISTS "Users can read own profile"        ON profiles;
+DROP POLICY IF EXISTS "Users can update own profile"      ON profiles;
+DROP POLICY IF EXISTS "Admin reads all profiles"          ON profiles;
+
+-- 5. Policies: productos
+CREATE POLICY "Lectura publica productos"
+  ON productos FOR SELECT USING (activo = true);
+
+CREATE POLICY "Admin lee todos los productos"
+  ON productos FOR SELECT USING (is_admin());
+
+CREATE POLICY "Admin inserta productos"
+  ON productos FOR INSERT WITH CHECK (is_admin());
+
+CREATE POLICY "Admin actualiza productos"
+  ON productos FOR UPDATE USING (is_admin());
+
+CREATE POLICY "Admin elimina productos"
+  ON productos FOR DELETE USING (is_admin());
+
+-- 6. Policies: categorias
+CREATE POLICY "Admin inserta categorias"
+  ON categorias FOR INSERT WITH CHECK (is_admin());
+
+CREATE POLICY "Admin actualiza categorias"
+  ON categorias FOR UPDATE USING (is_admin());
+
+CREATE POLICY "Admin elimina categorias"
+  ON categorias FOR DELETE USING (is_admin());
+
+-- 7. Policies: profiles
+CREATE POLICY "Users can read own profile"
+  ON profiles FOR SELECT USING (auth.uid() = id);
+
+CREATE POLICY "Users can update own profile"
+  ON profiles FOR UPDATE USING (auth.uid() = id);
+
+-- Admin lee TODOS los perfiles (sin subquery recursiva, usa is_admin())
+CREATE POLICY "Admin reads all profiles"
+  ON profiles FOR SELECT USING (is_admin());
+
+-- 8. Dar rol admin (cambiá el email si es necesario)
+UPDATE profiles SET role = 'admin'
+  WHERE id = (SELECT id FROM auth.users WHERE email = 'marcelolascano2020@gmail.com');
+
+-- 9. Verificar
 SELECT u.email, p.role
   FROM auth.users u
   JOIN profiles p ON p.id = u.id
@@ -154,6 +136,32 @@ async function runChecks() {
     await supabase.from('categorias').delete().eq('id', insertedCat.id);
   }
 
+  // 6. Can admin read ALL profiles (not just own)?
+  const { data: allProfiles, error: readProfilesErr } = await supabase
+    .from('profiles').select('id');
+  const canSeeAll = !readProfilesErr && (allProfiles?.length ?? 0) > 1;
+  results.readAllProfiles = {
+    ok: canSeeAll,
+    detail: readProfilesErr?.message || (canSeeAll ? 'OK' : `Solo se ven ${allProfiles?.length ?? 0} perfil(es). Ejecutá el SQL para crear is_admin() y la policy "Admin reads all profiles".`),
+  };
+
+  // 7. Can user update own profile? (upsert a harmless field and verify it stuck)
+  const testBarrio = `__test_${Date.now()}__`;
+  const { data: upserted, error: upErr } = await supabase
+    .from('profiles')
+    .upsert({ id: user.id, barrio: testBarrio }, { onConflict: 'id' })
+    .select('barrio')
+    .single();
+  const updateOk = !upErr && upserted?.barrio === testBarrio;
+  if (updateOk) {
+    // Restore to null
+    await supabase.from('profiles').update({ barrio: null }).eq('id', user.id);
+  }
+  results.updateProfile = {
+    ok: updateOk,
+    detail: upErr?.message || (updateOk ? 'OK' : 'El UPDATE en profiles fue bloqueado por RLS. Ejecutá el SQL para crear "Users can update own profile".'),
+  };
+
   return results;
 }
 
@@ -177,7 +185,8 @@ export default function SetupChecker() {
   if (!checks) return null;
 
   const allOk = checks.auth?.ok && checks.profile?.ok && checks.isAdmin?.ok
-    && checks.readProductos?.ok && checks.writeProductos?.ok && checks.writeCategorias?.ok;
+    && checks.readProductos?.ok && checks.writeProductos?.ok && checks.writeCategorias?.ok
+    && checks.readAllProfiles?.ok && checks.updateProfile?.ok;
 
   if (allOk && dismissed) return null;
   if (allOk) return (
@@ -235,6 +244,8 @@ export default function SetupChecker() {
         <Row label="Leer productos"               result={checks.readProductos} />
         <Row label="Escribir en productos"        result={checks.writeProductos} />
         <Row label="Escribir en categorías"       result={checks.writeCategorias} />
+        <Row label="Admin ve todos los perfiles"  result={checks.readAllProfiles} />
+        <Row label="Guardar perfil de cliente"    result={checks.updateProfile} />
       </div>
 
       {/* SQL Block */}
