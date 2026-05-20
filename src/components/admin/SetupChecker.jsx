@@ -6,93 +6,140 @@ const SQL = `-- ═════════════════════�
 -- EJECUTAR COMPLETO EN: Supabase → SQL Editor
 -- ═══════════════════════════════════════════════
 
--- 1. Columnas nuevas en productos (si no existen)
+-- 1. Columnas en productos
 ALTER TABLE productos ADD COLUMN IF NOT EXISTS imagen_url text;
 ALTER TABLE productos ADD COLUMN IF NOT EXISTS mascota text DEFAULT 'Varios';
 
--- 2. Columnas de perfil de cliente
+-- 2. Columnas en profiles
 ALTER TABLE profiles ENABLE ROW LEVEL SECURITY;
-ALTER TABLE profiles ADD COLUMN IF NOT EXISTS nombre_completo   text;
-ALTER TABLE profiles ADD COLUMN IF NOT EXISTS celular           text;
-ALTER TABLE profiles ADD COLUMN IF NOT EXISTS barrio            text;
-ALTER TABLE profiles ADD COLUMN IF NOT EXISTS nombre_mascota    text;
-ALTER TABLE profiles ADD COLUMN IF NOT EXISTS edad_mascota      text;
+ALTER TABLE profiles ADD COLUMN IF NOT EXISTS email            text;
+ALTER TABLE profiles ADD COLUMN IF NOT EXISTS nombre_completo  text;
+ALTER TABLE profiles ADD COLUMN IF NOT EXISTS celular          text;
+ALTER TABLE profiles ADD COLUMN IF NOT EXISTS barrio           text;
+ALTER TABLE profiles ADD COLUMN IF NOT EXISTS nombre_mascota   text;
+ALTER TABLE profiles ADD COLUMN IF NOT EXISTS edad_mascota     text;
 ALTER TABLE profiles ADD COLUMN IF NOT EXISTS juguete_preferido text;
 
--- 3. Función is_admin() — evita recursión en RLS al consultar profiles
---    SECURITY DEFINER hace que corra como superuser, sin RLS.
+-- 3. is_admin(): evita recursión en RLS, corre sin RLS (SECURITY DEFINER)
 CREATE OR REPLACE FUNCTION is_admin()
 RETURNS boolean LANGUAGE sql SECURITY DEFINER STABLE AS $$
-  SELECT EXISTS (
-    SELECT 1 FROM profiles WHERE id = auth.uid() AND role = 'admin'
-  );
+  SELECT EXISTS (SELECT 1 FROM profiles WHERE id = auth.uid() AND role = 'admin');
 $$;
 
--- 4. Quitar todas las policies viejas para empezar limpio
-DROP POLICY IF EXISTS "Enable read access for all users"  ON productos;
-DROP POLICY IF EXISTS "Admin gestiona productos"          ON productos;
-DROP POLICY IF EXISTS "Admin puede ver todos"             ON productos;
-DROP POLICY IF EXISTS "Lectura publica productos"         ON productos;
-DROP POLICY IF EXISTS "Admin lee todos los productos"     ON productos;
-DROP POLICY IF EXISTS "Admin inserta productos"           ON productos;
-DROP POLICY IF EXISTS "Admin actualiza productos"         ON productos;
-DROP POLICY IF EXISTS "Admin elimina productos"           ON productos;
+-- 4. Trigger: crear/actualizar fila en profiles al registrarse
+CREATE OR REPLACE FUNCTION handle_new_user()
+RETURNS trigger LANGUAGE plpgsql SECURITY DEFINER AS $$
+BEGIN
+  INSERT INTO public.profiles (id, role, email, created_at)
+  VALUES (NEW.id, 'cliente', NEW.email, NOW())
+  ON CONFLICT (id) DO UPDATE SET email = NEW.email;
+  RETURN NEW;
+END;
+$$;
 
-DROP POLICY IF EXISTS "Admin gestiona categorias"         ON categorias;
-DROP POLICY IF EXISTS "Admin inserta categorias"          ON categorias;
-DROP POLICY IF EXISTS "Admin actualiza categorias"        ON categorias;
-DROP POLICY IF EXISTS "Admin elimina categorias"          ON categorias;
+DROP TRIGGER IF EXISTS on_auth_user_created ON auth.users;
+CREATE TRIGGER on_auth_user_created
+  AFTER INSERT ON auth.users
+  FOR EACH ROW EXECUTE FUNCTION handle_new_user();
 
-DROP POLICY IF EXISTS "Users can read own profile"        ON profiles;
-DROP POLICY IF EXISTS "Users can update own profile"      ON profiles;
-DROP POLICY IF EXISTS "Admin reads all profiles"          ON profiles;
+-- 5. RPC: get_users_with_email() — admin puede leer auth.users via SECURITY DEFINER
+CREATE OR REPLACE FUNCTION get_users_with_email()
+RETURNS TABLE (
+  id uuid, email text, role text,
+  nombre_completo text, celular text, barrio text,
+  nombre_mascota text, edad_mascota text, juguete_preferido text,
+  created_at timestamptz
+)
+LANGUAGE plpgsql SECURITY DEFINER STABLE AS $$
+BEGIN
+  IF NOT is_admin() THEN
+    RAISE EXCEPTION 'acceso denegado';
+  END IF;
+  RETURN QUERY
+    SELECT
+      p.id,
+      u.email,
+      p.role,
+      p.nombre_completo,
+      p.celular,
+      p.barrio,
+      p.nombre_mascota,
+      p.edad_mascota,
+      p.juguete_preferido,
+      COALESCE(p.created_at, u.created_at)
+    FROM auth.users u
+    LEFT JOIN profiles p ON p.id = u.id
+    ORDER BY u.created_at DESC;
+END;
+$$;
 
--- 5. Policies: productos
+-- 6. Quitar policies viejas para empezar limpio
+DROP POLICY IF EXISTS "Enable read access for all users"   ON productos;
+DROP POLICY IF EXISTS "Admin gestiona productos"           ON productos;
+DROP POLICY IF EXISTS "Admin puede ver todos"              ON productos;
+DROP POLICY IF EXISTS "Lectura publica productos"          ON productos;
+DROP POLICY IF EXISTS "Admin lee todos los productos"      ON productos;
+DROP POLICY IF EXISTS "Admin inserta productos"            ON productos;
+DROP POLICY IF EXISTS "Admin actualiza productos"          ON productos;
+DROP POLICY IF EXISTS "Admin elimina productos"            ON productos;
+DROP POLICY IF EXISTS "Admin gestiona categorias"          ON categorias;
+DROP POLICY IF EXISTS "Admin inserta categorias"           ON categorias;
+DROP POLICY IF EXISTS "Admin actualiza categorias"         ON categorias;
+DROP POLICY IF EXISTS "Admin elimina categorias"           ON categorias;
+DROP POLICY IF EXISTS "Users can read own profile"         ON profiles;
+DROP POLICY IF EXISTS "Users can insert own profile"       ON profiles;
+DROP POLICY IF EXISTS "Users can update own profile"       ON profiles;
+DROP POLICY IF EXISTS "Admin reads all profiles"           ON profiles;
+
+-- 7. Policies: productos
 CREATE POLICY "Lectura publica productos"
   ON productos FOR SELECT USING (activo = true);
-
 CREATE POLICY "Admin lee todos los productos"
   ON productos FOR SELECT USING (is_admin());
-
 CREATE POLICY "Admin inserta productos"
   ON productos FOR INSERT WITH CHECK (is_admin());
-
 CREATE POLICY "Admin actualiza productos"
   ON productos FOR UPDATE USING (is_admin());
-
 CREATE POLICY "Admin elimina productos"
   ON productos FOR DELETE USING (is_admin());
 
--- 6. Policies: categorias
+-- 8. Policies: categorias
 CREATE POLICY "Admin inserta categorias"
   ON categorias FOR INSERT WITH CHECK (is_admin());
-
 CREATE POLICY "Admin actualiza categorias"
   ON categorias FOR UPDATE USING (is_admin());
-
 CREATE POLICY "Admin elimina categorias"
   ON categorias FOR DELETE USING (is_admin());
 
--- 7. Policies: profiles
+-- 9. Policies: profiles
 CREATE POLICY "Users can read own profile"
   ON profiles FOR SELECT USING (auth.uid() = id);
+
+-- INSERT: necesario para upsert cuando la fila no existe aún
+CREATE POLICY "Users can insert own profile"
+  ON profiles FOR INSERT WITH CHECK (auth.uid() = id);
 
 CREATE POLICY "Users can update own profile"
   ON profiles FOR UPDATE USING (auth.uid() = id);
 
--- Admin lee TODOS los perfiles (sin subquery recursiva, usa is_admin())
+-- Admin lee todos los perfiles via is_admin() (sin recursión)
 CREATE POLICY "Admin reads all profiles"
   ON profiles FOR SELECT USING (is_admin());
 
--- 8. Dar rol admin (cambiá el email si es necesario)
+-- 10. Dar rol admin
 UPDATE profiles SET role = 'admin'
   WHERE id = (SELECT id FROM auth.users WHERE email = 'marcelolascano2020@gmail.com');
 
--- 9. Verificar
-SELECT u.email, p.role
-  FROM auth.users u
-  JOIN profiles p ON p.id = u.id
-  WHERE u.email = 'marcelolascano2020@gmail.com';`;
+-- 11. Backfill de emails para usuarios ya registrados
+UPDATE profiles p
+SET email = u.email
+FROM auth.users u
+WHERE p.id = u.id AND (p.email IS NULL OR p.email = '');
+
+-- 12. Verificar
+SELECT u.email, p.role FROM auth.users u
+JOIN profiles p ON p.id = u.id
+WHERE u.email = 'marcelolascano2020@gmail.com';`;
 
 async function runChecks() {
   const results = {};
@@ -136,13 +183,12 @@ async function runChecks() {
     await supabase.from('categorias').delete().eq('id', insertedCat.id);
   }
 
-  // 6. Can admin read ALL profiles (not just own)?
-  const { data: allProfiles, error: readProfilesErr } = await supabase
-    .from('profiles').select('id');
-  const canSeeAll = !readProfilesErr && (allProfiles?.length ?? 0) > 1;
+  // 6. Can admin call get_users_with_email() RPC?
+  const { data: rpcData, error: rpcErr } = await supabase.rpc('get_users_with_email');
+  const canSeeAll = !rpcErr && (rpcData?.length ?? 0) >= 1;
   results.readAllProfiles = {
     ok: canSeeAll,
-    detail: readProfilesErr?.message || (canSeeAll ? 'OK' : `Solo se ven ${allProfiles?.length ?? 0} perfil(es). Ejecutá el SQL para crear is_admin() y la policy "Admin reads all profiles".`),
+    detail: rpcErr?.message || (canSeeAll ? `OK (${rpcData.length} usuario(s))` : 'Sin datos. Ejecutá el SQL para crear get_users_with_email().'),
   };
 
   // 7. Can user update own profile? (upsert a harmless field and verify it stuck)

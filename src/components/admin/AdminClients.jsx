@@ -45,10 +45,10 @@ export default function AdminClients() {
   const [error, setError]       = useState('');
 
   useEffect(() => {
+    // get_users_with_email() is a SECURITY DEFINER RPC that joins auth.users,
+    // so email is always accurate and all users are visible to admin.
     supabase
-      .from('profiles')
-      .select('*')
-      .order('created_at', { ascending: false })
+      .rpc('get_users_with_email')
       .then(({ data, error: e }) => {
         if (e) setError(e.message);
         setProfiles(data || []);
@@ -65,9 +65,11 @@ export default function AdminClients() {
 
       {error && (
         <div style={{ background: '#fdf0f0', border: '1px solid #f5c6c6', borderRadius: 12, padding: '14px 18px', color: '#c0392b', fontSize: 13, marginBottom: 16 }}>
-          <strong>Error al cargar perfiles:</strong> {error}
+          <strong>Error al cargar clientes:</strong> {error}
           <p style={{ margin: '8px 0 0', color: '#888' }}>
-            Verificá que la tabla <code>profiles</code> exista y que RLS permita al admin leerla. Ejecutá el SQL del diagnóstico arriba del panel.
+            {error.includes('function') || error.includes('does not exist')
+              ? 'La función get_users_with_email() no existe aún. Ejecutá el SQL completo desde el panel de Diagnóstico.'
+              : 'Verificá que RLS y las políticas de profiles estén configuradas. Ejecutá el SQL del diagnóstico.'}
           </p>
         </div>
       )}
