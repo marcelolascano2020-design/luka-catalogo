@@ -444,7 +444,7 @@ export default function Header({ query, setQuery, totalItems, onCartOpen, onCalc
                 </button>
               ) : (
                 <button className="luka-pill" onClick={() => setAuthOpen(true)}>
-                  <span>Ingresar</span>
+                  <Icon.Users s={16} /> <span>Ingresar</span>
                 </button>
               )
             )}
