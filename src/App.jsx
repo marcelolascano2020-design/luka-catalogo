@@ -8,6 +8,7 @@ import CartDrawer from './components/CartDrawer';
 import CalcModal from './components/CalcModal';
 import Footer from './components/Footer';
 import AdminPanel from './components/AdminPanel';
+import Toast, { useToast } from './components/Toast';
 import { Icon } from './components/Icons';
 import { CATEGORIAS as STATIC_CATS, PRODUCTOS as STATIC_PRODS } from './data/productos';
 import { supabase, supabaseReady } from './lib/supabase';
@@ -57,6 +58,7 @@ function Catalog() {
   const [cart, setCart]           = useState([]);
   const [cartOpen, setCartOpen]   = useState(false);
   const [calcOpen, setCalcOpen]   = useState(false);
+  const { toast, showToast }      = useToast();
 
   const [products, setProducts]   = useState([]);
   const [cats, setCats]           = useState([]);
@@ -120,7 +122,7 @@ function Catalog() {
       }
       return [...prev, { p, qty: 1 }];
     });
-    setCartOpen(true);
+    showToast(p.name);
   };
 
   const setQty    = (id, qty) => setCart(prev => prev.map(it => it.p.id === id ? { ...it, qty: Math.max(1, qty) } : it));
@@ -226,6 +228,7 @@ function Catalog() {
         onClear={clearCart}
       />
       <CalcModal open={calcOpen} onClose={() => setCalcOpen(false)} />
+      <Toast toast={toast} />
 
       {!cartOpen && !calcOpen && (
         <a className="luka-fab" href={`https://wa.me/${WA_PHONE}`} target="_blank" rel="noopener noreferrer" aria-label="WhatsApp">
