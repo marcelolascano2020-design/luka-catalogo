@@ -42,35 +42,38 @@ CREATE TRIGGER on_auth_user_created
   AFTER INSERT ON auth.users
   FOR EACH ROW EXECUTE FUNCTION handle_new_user();
 
--- 5. RPC: get_users_with_email() — admin puede leer auth.users via SECURITY DEFINER
-CREATE OR REPLACE FUNCTION get_users_with_email()
+-- 5. RPC: get_users_with_email()
+--    SECURITY DEFINER + explicit casts evitan "structure of query does not match"
+DROP FUNCTION IF EXISTS get_users_with_email();
+CREATE FUNCTION get_users_with_email()
 RETURNS TABLE (
-  id uuid, email text, role text,
-  nombre_completo text, celular text, barrio text,
-  nombre_mascota text, edad_mascota text, juguete_preferido text,
-  created_at timestamptz
+  id               uuid,
+  email            text,
+  role             text,
+  nombre_completo  text,
+  celular          text,
+  barrio           text,
+  nombre_mascota   text,
+  edad_mascota     text,
+  juguete_preferido text,
+  created_at       timestamptz
 )
-LANGUAGE plpgsql SECURITY DEFINER STABLE AS $$
-BEGIN
-  IF NOT is_admin() THEN
-    RAISE EXCEPTION 'acceso denegado';
-  END IF;
-  RETURN QUERY
-    SELECT
-      p.id,
-      u.email,
-      p.role,
-      p.nombre_completo,
-      p.celular,
-      p.barrio,
-      p.nombre_mascota,
-      p.edad_mascota,
-      p.juguete_preferido,
-      COALESCE(p.created_at, u.created_at)
-    FROM auth.users u
-    LEFT JOIN profiles p ON p.id = u.id
-    ORDER BY u.created_at DESC;
-END;
+LANGUAGE sql SECURITY DEFINER STABLE AS $$
+  SELECT
+    p.id                                          AS id,
+    u.email::text                                 AS email,
+    COALESCE(p.role, 'cliente')::text             AS role,
+    p.nombre_completo::text                       AS nombre_completo,
+    p.celular::text                               AS celular,
+    p.barrio::text                                AS barrio,
+    p.nombre_mascota::text                        AS nombre_mascota,
+    p.edad_mascota::text                          AS edad_mascota,
+    p.juguete_preferido::text                     AS juguete_preferido,
+    COALESCE(p.created_at, u.created_at)::timestamptz AS created_at
+  FROM auth.users u
+  LEFT JOIN profiles p ON p.id = u.id
+  WHERE is_admin()
+  ORDER BY u.created_at DESC;
 $$;
 
 -- 6. Quitar policies viejas para empezar limpio
