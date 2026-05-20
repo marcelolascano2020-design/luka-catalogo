@@ -14,31 +14,22 @@ function hashIdx(id) {
   return Math.abs(h) % PALETTE.length;
 }
 
+const FALLBACK = {
+  Perros: 'https://images.unsplash.com/photo-1589924691995-400dc9ecc119?w=400',
+  Gatos:  'https://images.unsplash.com/photo-1574158622682-e40e69881006?w=400',
+  _default:'https://images.unsplash.com/photo-1601758003122-53c40e686a19?w=400',
+};
+
+function fallbackUrl(pet) {
+  return FALLBACK[pet] ?? FALLBACK._default;
+}
+
 export function ProductImage({ p, ratio = "4 / 3" }) {
-  const [bg, fg] = PALETTE[hashIdx(p.id)];
-  const label = `${p.brand} · ${p.size}`;
-  if (p.imagen_url) {
-    return (
-      <div className="luka-prod-img" style={{ aspectRatio: ratio }}>
-        <img src={p.imagen_url} alt={p.name}
-          style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-      </div>
-    );
-  }
+  const src = p.imagen_url || fallbackUrl(p.pet);
   return (
-    <div className="luka-prod-img" style={{ background: bg, aspectRatio: ratio }}>
-      <svg className="luka-prod-stripes" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">
-        <defs>
-          <pattern id={`s-${p.id}`} width="8" height="8" patternUnits="userSpaceOnUse" patternTransform="rotate(35)">
-            <line x1="0" y1="0" x2="0" y2="8" stroke={fg} strokeOpacity="0.18" strokeWidth="4" />
-          </pattern>
-        </defs>
-        <rect width="100" height="100" fill={`url(#s-${p.id})`} />
-      </svg>
-      <div className="luka-prod-img-tag">
-        <span className="luka-mono">FOTO · {p.cat.toUpperCase()}</span>
-        <span className="luka-mono luka-mono-sm">{label}</span>
-      </div>
+    <div className="luka-prod-img" style={{ aspectRatio: ratio }}>
+      <img src={src} alt={p.name}
+        style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
     </div>
   );
 }

@@ -233,6 +233,12 @@ a { color: inherit; }
 
 .luka-side-help { background: var(--cream-2); border-radius: 14px; padding: 16px; display: flex; flex-direction: column; gap: 8px; }
 .luka-side-help p { font-size: 13px; color: var(--ink-2); margin: 0; line-height: 1.5; }
+.luka-side-apply { display: none; }
+.luka-side-apply button {
+  width: 100%; padding: 14px; border-radius: 12px; border: none;
+  background: var(--ink); color: #FCEFA8;
+  font-size: 15px; font-weight: 800; cursor: pointer;
+}
 
 .luka-mobile-filter { display: none; align-items: center; gap: 8px; padding: 10px 14px; background: var(--paper); border: 1px solid var(--line-2); border-radius: 10px; font-weight: 600; font-size: 13px; }
 
@@ -421,6 +427,7 @@ a { color: inherit; }
   .luka-main-inner { grid-template-columns: 1fr; padding: 0 18px; gap: 20px; }
   .luka-side { position: relative; top: auto; display: none; }
   .luka-side.is-open { display: flex; }
+  .luka-side.is-open .luka-side-apply { display: block; }
   .luka-mobile-filter { display: inline-flex; }
   .luka-footer-inner { grid-template-columns: 1fr 1fr; padding: 0 18px; gap: 24px; }
   .luka-top-strip > *:nth-child(3) { display: none; }

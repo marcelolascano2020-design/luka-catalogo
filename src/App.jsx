@@ -172,6 +172,8 @@ function Catalog() {
             setSort={setSort}
             counts={counts}
             filterOpen={filterOpen}
+            onClose={() => setFilterOpen(false)}
+            filteredCount={filtered.length}
             onCalcOpen={() => setCalcOpen(true)}
           />
 
