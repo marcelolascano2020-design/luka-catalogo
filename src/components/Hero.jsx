@@ -30,16 +30,11 @@ function useHeroConfig() {
   return cfg;
 }
 
-export default function Hero({ onCalcOpen }) {
+export default function Hero({ onCalcOpen, onActivateDestacados }) {
   const cfg = useHeroConfig();
 
   const scrollToCatalog = () => {
     document.getElementById('catalogo')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-  };
-
-  const scrollToFeatured = () => {
-    const target = document.getElementById('destacados') || document.getElementById('catalogo');
-    target?.scrollIntoView({ behavior: 'smooth', block: 'start' });
   };
 
   return (
@@ -63,7 +58,7 @@ export default function Hero({ onCalcOpen }) {
           {/* Card HOY — clickeable, scrollea al catálogo */}
           <button
             className="luka-hero-card luka-hero-card-1 luka-hero-card-clickable"
-            onClick={scrollToFeatured}
+            onClick={onActivateDestacados}
           >
             <div className="luka-eyebrow">{cfg.hero_hoy_etiqueta}</div>
             <strong>{cfg.hero_hoy_titulo}</strong>

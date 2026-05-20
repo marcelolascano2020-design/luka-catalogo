@@ -49,12 +49,13 @@ function normalizeCategory(c) {
 
 // ─── Catalog view ─────────────────────────────────────────────────────────────
 function Catalog() {
-  const [layout, setLayout]       = useState('grid');
-  const [query, setQuery]         = useState('');
-  const [cat, setCat]             = useState('all');
-  const [pet, setPet]             = useState('all');
-  const [sort, setSort]           = useState('default');
-  const [filterOpen, setFilterOpen] = useState(false);
+  const [layout, setLayout]           = useState('grid');
+  const [query, setQuery]             = useState('');
+  const [cat, setCat]                 = useState('all');
+  const [pet, setPet]                 = useState('all');
+  const [sort, setSort]               = useState('default');
+  const [onlyDestacados, setOnlyDestacados] = useState(false);
+  const [filterOpen, setFilterOpen]   = useState(false);
 
   const [cart, setCart]           = useState([]);
   const [cartOpen, setCartOpen]   = useState(false);
@@ -105,13 +106,14 @@ function Catalog() {
     let list = products.filter(p => {
       if (cat !== 'all' && p.cat !== cat) return false;
       if (pet !== 'all' && p.pet !== pet) return false;
+      if (onlyDestacados && !p.destacado) return false;
       if (q && !(`${p.name} ${p.brand} ${p.tags?.join(' ')} ${p.desc}`.toLowerCase().includes(q))) return false;
       return true;
     });
     if (sort === 'az')    list = [...list].sort((a, b) => a.name.localeCompare(b.name));
     if (sort === 'brand') list = [...list].sort((a, b) => a.brand.localeCompare(b.brand));
     return list;
-  }, [products, query, cat, pet, sort]);
+  }, [products, query, cat, pet, sort, onlyDestacados]);
 
   const addToCart = (p) => {
     setCart(prev => {
@@ -147,7 +149,13 @@ function Catalog() {
         onCalcOpen={() => setCalcOpen(true)}
       />
 
-      <Hero onCalcOpen={() => setCalcOpen(true)} />
+      <Hero
+        onCalcOpen={() => setCalcOpen(true)}
+        onActivateDestacados={() => {
+          setOnlyDestacados(true);
+          document.getElementById('catalogo')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }}
+      />
 
       {/* Mobile-only calculator banner — hidden on desktop via CSS */}
       <div className="luka-calc-banner">
@@ -162,22 +170,6 @@ function Catalog() {
           </button>
         </div>
       </div>
-
-      {products.some(p => p.destacado) && (
-        <section id="destacados" className="luka-main" style={{ paddingBottom: 0 }}>
-          <div style={{ maxWidth: 1400, margin: '0 auto', padding: '0 28px' }}>
-            <div className="luka-feed">
-              <div className="luka-feed-head">
-                <div>
-                  <div className="luka-eyebrow">Selección especial</div>
-                  <h2>⭐ Destacados</h2>
-                </div>
-              </div>
-              <ProductGrid products={products.filter(p => p.destacado)} onAdd={addToCart} layout={layout} />
-            </div>
-          </div>
-        </section>
-      )}
 
       <main className="luka-main" id="catalogo">
         <div className="luka-main-inner">
@@ -194,6 +186,8 @@ function Catalog() {
             onClose={() => setFilterOpen(false)}
             filteredCount={filtered.length}
             onCalcOpen={() => setCalcOpen(true)}
+            onlyDestacados={onlyDestacados}
+            setOnlyDestacados={setOnlyDestacados}
           />
 
           <section className="luka-feed">
@@ -203,7 +197,7 @@ function Catalog() {
                   {filtered.length} {filtered.length === 1 ? 'producto' : 'productos'}
                   {fromSupabase && <span style={{ marginLeft: 6, opacity: 0.5, fontSize: 10 }}>● live</span>}
                 </div>
-                <h2>{cat === 'all' ? 'Catálogo completo' : cats.find(c => c.id === cat)?.label}</h2>
+                <h2>{onlyDestacados ? '⭐ Destacados' : cat === 'all' ? 'Catálogo completo' : cats.find(c => c.id === cat)?.label}</h2>
               </div>
               <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
                 <button className="luka-mobile-filter" onClick={() => setFilterOpen(o => !o)}>

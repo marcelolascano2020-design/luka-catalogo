@@ -4,10 +4,15 @@ const WA_PHONE = import.meta.env.VITE_WHATSAPP_NUMBER || "5493515504248";
 
 const isMobile = () => typeof window !== 'undefined' && window.innerWidth < 980;
 
-export default function CategoryFilter({ cats, cat, setCat, pet, setPet, sort, setSort, counts, filterOpen, onClose, filteredCount, onCalcOpen }) {
+export default function CategoryFilter({ cats, cat, setCat, pet, setPet, sort, setSort, counts, filterOpen, onClose, filteredCount, onCalcOpen, onlyDestacados, setOnlyDestacados }) {
 
   const handlePet = (v) => {
     setPet(v);
+    if (isMobile()) onClose();
+  };
+
+  const handleDestacados = () => {
+    setOnlyDestacados(v => !v);
     if (isMobile()) onClose();
   };
 
@@ -24,6 +29,7 @@ export default function CategoryFilter({ cats, cat, setCat, pet, setPet, sort, s
           {[['all','Todas'],['Perros','Perros'],['Gatos','Gatos'],['Aves','Aves'],['Varios','Varios']].map(([v, l]) => (
             <button key={v} className={`luka-chip ${pet === v ? 'on' : ''}`} onClick={() => handlePet(v)}>{l}</button>
           ))}
+          <button className={`luka-chip ${onlyDestacados ? 'on' : ''}`} onClick={handleDestacados}>⭐ Destacados</button>
         </div>
       </div>
       <div className="luka-side-section">
