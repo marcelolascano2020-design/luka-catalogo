@@ -8,7 +8,7 @@ export default function CategoryFilter({ cats, cat, setCat, pet, setPet, sort, s
       <div className="luka-side-section">
         <div className="luka-side-title">Mascota</div>
         <div className="luka-chips">
-          {[['all','Todas'],['Perro','Perros'],['Gato','Gatos'],['Ave','Aves'],['Varios','Varios']].map(([v, l]) => (
+          {[['all','Todas'],['Perros','Perros'],['Gatos','Gatos'],['Aves','Aves'],['Varios','Varios']].map(([v, l]) => (
             <button key={v} className={`luka-chip ${pet === v ? 'on' : ''}`} onClick={() => setPet(v)}>{l}</button>
           ))}
         </div>

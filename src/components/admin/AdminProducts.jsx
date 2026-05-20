@@ -59,10 +59,10 @@ function Modal({ title, onClose, children, wide }) {
 const EMPTY = { nombre: '', descripcion: '', marca: '', precio: '', unidad: '', categoria_id: '', mascota: 'Varios', activo: true, destacado: false };
 // Valores deben coincidir con el filtro de CategoryFilter y con los datos estáticos
 const MASCOTAS = [
-  { value: 'Perro',  label: 'Perros'  },
-  { value: 'Gato',   label: 'Gatos'   },
-  { value: 'Ave',    label: 'Aves'    },
-  { value: 'Varios', label: 'Varios'  },
+  { value: 'Perros', label: 'Perros' },
+  { value: 'Gatos',  label: 'Gatos'  },
+  { value: 'Aves',   label: 'Aves'   },
+  { value: 'Varios', label: 'Varios' },
 ];
 
 function ProductForm({ initial, categorias, onSave, onClose }) {
