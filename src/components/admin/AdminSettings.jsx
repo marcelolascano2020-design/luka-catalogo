@@ -11,12 +11,17 @@ const fld = { display: 'flex', flexDirection: 'column', gap: 6 };
 const lbl = { fontSize: 12, fontWeight: 700, color: '#555', textTransform: 'uppercase', letterSpacing: '0.04em' };
 
 const DEFAULTS = {
-  nombre_negocio: 'Luka',
-  descripcion:    'Alimentos balanceados para mascotas',
-  direccion:      'Octavio Pinto 2207, Córdoba',
-  telefono:       '+54 9 3515 50-4248',
-  whatsapp:       '5493515504248',
-  horario:        '',
+  nombre_negocio:      'Luka',
+  descripcion:         'Alimentos balanceados para mascotas',
+  direccion:           'Octavio Pinto 2207, Córdoba',
+  telefono:            '+54 9 3515 50-4248',
+  whatsapp:            '5493515504248',
+  horario:             '',
+  hero_titulo:         'Comida y accesorios para que tu mascota coma como Luka.',
+  hero_subtitulo:      'Alimento balanceado, snacks y todo lo que necesita tu mascota. Armá tu pedido y mandanos un mensaje — te confirmamos precios y stock al toque.',
+  hero_hoy_etiqueta:   'Hoy',
+  hero_hoy_titulo:     'Bolsa de 15 kg',
+  hero_hoy_descripcion:'Llevá tu marca habitual al mejor precio.',
 };
 const LS_KEY = 'luka-config';
 
@@ -176,6 +181,37 @@ WHERE id = (SELECT id FROM auth.users WHERE email = 'marcelolascano2020@gmail.co
               <div style={fld}>
                 <span style={lbl}>Horario de atención</span>
                 <input type="text" style={inp} value={config.horario} onChange={e => set('horario', e.target.value)} placeholder="Lun–Vie 9–18hs" />
+              </div>
+            </div>
+
+            {/* Hero texts */}
+            <div style={{ borderTop: '1px solid #e8e0d8', paddingTop: 20 }}>
+              <div style={{ fontSize: 13, fontWeight: 700, color: '#2b1f14', marginBottom: 14, textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                Textos del Hero
+              </div>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+                <div style={fld}>
+                  <span style={lbl}>Título principal</span>
+                  <input type="text" style={inp} value={config.hero_titulo} onChange={e => set('hero_titulo', e.target.value)} placeholder="Comida y accesorios para que tu mascota coma como Luka." />
+                </div>
+                <div style={fld}>
+                  <span style={lbl}>Subtítulo</span>
+                  <textarea style={{ ...inp, resize: 'vertical', minHeight: 72 }} value={config.hero_subtitulo} onChange={e => set('hero_subtitulo', e.target.value)} placeholder="Descripción debajo del título…" />
+                </div>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 14 }}>
+                  <div style={fld}>
+                    <span style={lbl}>Card HOY — Etiqueta</span>
+                    <input type="text" style={inp} value={config.hero_hoy_etiqueta} onChange={e => set('hero_hoy_etiqueta', e.target.value)} placeholder="Hoy" />
+                  </div>
+                  <div style={fld}>
+                    <span style={lbl}>Card HOY — Título</span>
+                    <input type="text" style={inp} value={config.hero_hoy_titulo} onChange={e => set('hero_hoy_titulo', e.target.value)} placeholder="Bolsa de 15 kg" />
+                  </div>
+                  <div style={fld}>
+                    <span style={lbl}>Card HOY — Descripción</span>
+                    <input type="text" style={inp} value={config.hero_hoy_descripcion} onChange={e => set('hero_hoy_descripcion', e.target.value)} placeholder="Llevá tu marca habitual al mejor precio." />
+                  </div>
+                </div>
               </div>
             </div>
 

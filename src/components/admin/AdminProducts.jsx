@@ -353,6 +353,7 @@ export default function AdminProducts() {
   const [selected, setSelected] = useState(null);
   const [search, setSearch] = useState('');
   const [toggling, setToggling] = useState(null);
+  const [tab, setTab] = useState('todos'); // 'todos' | 'destacados'
 
   useEffect(() => { fetchAll(); }, []);
 
@@ -382,14 +383,26 @@ export default function AdminProducts() {
   };
 
   const toggleActivo = async (p) => {
-    setToggling(p.id);
+    setToggling(p.id + '-activo');
     const { error: e } = await supabase.from('productos').update({ activo: !p.activo }).eq('id', p.id);
     if (!e) setProductos(prev => prev.map(x => x.id === p.id ? { ...x, activo: !x.activo } : x));
     else alert(`Error: ${e.message}`);
     setToggling(null);
   };
 
-  const filtered = productos.filter(p => {
+  const toggleDestacado = async (p) => {
+    setToggling(p.id + '-dest');
+    const { error: e } = await supabase.from('productos').update({ destacado: !p.destacado }).eq('id', p.id);
+    if (!e) setProductos(prev => prev.map(x => x.id === p.id ? { ...x, destacado: !x.destacado } : x));
+    else alert(`Error: ${e.message}`);
+    setToggling(null);
+  };
+
+  const baseList = tab === 'destacados'
+    ? productos.filter(p => p.destacado)
+    : productos;
+
+  const filtered = baseList.filter(p => {
     if (!search) return true;
     const q = search.toLowerCase();
     return p.nombre?.toLowerCase().includes(q) || p.marca?.toLowerCase().includes(q);
@@ -408,6 +421,22 @@ export default function AdminProducts() {
         <button onClick={() => { setSelected(null); setModal('add'); }} style={btnPrimary}>
           <Icon.Plus s={15} /> Agregar producto
         </button>
+      </div>
+
+      {/* Tabs */}
+      <div style={{ display: 'flex', gap: 8, marginBottom: 20 }}>
+        {[['todos', `Todos (${productos.length})`], ['destacados', `⭐ Destacados (${productos.filter(p => p.destacado).length})`]].map(([k, l]) => (
+          <button
+            key={k}
+            onClick={() => setTab(k)}
+            style={{
+              padding: '8px 16px', borderRadius: 10, fontSize: 13, fontWeight: 700, cursor: 'pointer',
+              border: tab === k ? '2px solid #2b1f14' : '2px solid #e0d8d0',
+              background: tab === k ? '#2b1f14' : 'transparent',
+              color: tab === k ? '#FCEFA8' : '#2b1f14',
+            }}
+          >{l}</button>
+        ))}
       </div>
 
       {/* Search */}
@@ -439,7 +468,7 @@ export default function AdminProducts() {
           <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 14, minWidth: 640 }}>
             <thead>
               <tr style={{ background: '#f7f4f0', borderBottom: '1px solid #e8e0d8' }}>
-                {['Imagen', 'Nombre', 'Marca', 'Precio', 'Unidad', 'Categoría', 'Activo', 'Acciones'].map(h => (
+                {['Imagen', 'Nombre', 'Marca', 'Precio', 'Unidad', 'Categoría', 'Activo', 'Dest.', 'Acciones'].map(h => (
                   <th key={h} style={{ padding: '10px 14px', textAlign: 'left', fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em', color: '#888', whiteSpace: 'nowrap' }}>{h}</th>
                 ))}
               </tr>
@@ -465,15 +494,30 @@ export default function AdminProducts() {
                   <td style={{ padding: '10px 14px' }}>
                     <button
                       onClick={() => toggleActivo(p)}
-                      disabled={toggling === p.id}
+                      disabled={toggling === p.id + '-activo'}
                       style={{
                         padding: '4px 12px', borderRadius: 999, fontSize: 12, fontWeight: 700,
-                        border: 'none', cursor: 'pointer', opacity: toggling === p.id ? 0.5 : 1,
+                        border: 'none', cursor: 'pointer', opacity: toggling === p.id + '-activo' ? 0.5 : 1,
                         background: p.activo ? '#d4edda' : '#f8d7da',
                         color: p.activo ? '#155724' : '#721c24',
                       }}
                     >
                       {p.activo ? 'Activo' : 'Inactivo'}
+                    </button>
+                  </td>
+                  <td style={{ padding: '10px 14px' }}>
+                    <button
+                      onClick={() => toggleDestacado(p)}
+                      disabled={toggling === p.id + '-dest'}
+                      title={p.destacado ? 'Quitar destacado' : 'Destacar'}
+                      style={{
+                        width: 32, height: 32, borderRadius: 8, border: 'none', cursor: 'pointer',
+                        opacity: toggling === p.id + '-dest' ? 0.5 : 1,
+                        background: p.destacado ? '#FEF3C7' : '#f0ebe4',
+                        fontSize: 16,
+                      }}
+                    >
+                      {p.destacado ? '⭐' : '☆'}
                     </button>
                   </td>
                   <td style={{ padding: '10px 14px' }}>
@@ -485,8 +529,8 @@ export default function AdminProducts() {
                 </tr>
               ))}
               {filtered.length === 0 && (
-                <tr><td colSpan={8} style={{ padding: '48px 20px', textAlign: 'center', color: '#aaa' }}>
-                  {search ? 'Sin resultados.' : 'No hay productos todavía. Usá "Agregar producto" o importá desde Excel.'}
+                <tr><td colSpan={9} style={{ padding: '48px 20px', textAlign: 'center', color: '#aaa' }}>
+                  {tab === 'destacados' ? 'No hay productos destacados. Usá la estrella ☆ en cualquier producto para destacarlo.' : search ? 'Sin resultados.' : 'No hay productos todavía. Usá "Agregar producto" o importá desde Excel.'}
                 </td></tr>
               )}
             </tbody>

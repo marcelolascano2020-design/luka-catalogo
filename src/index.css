@@ -166,6 +166,28 @@ a { color: inherit; }
 .luka-hero-card-2 span { color: rgba(252,239,168,0.7); }
 .luka-hero-card-3 { grid-column: 1; }
 
+/* Card HOY — clickeable */
+.luka-hero-card-clickable {
+  text-align: left; cursor: pointer; transition: transform 0.15s, box-shadow 0.15s;
+}
+.luka-hero-card-clickable:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(43,31,20,0.12);
+}
+.luka-hero-card-arrow {
+  font-size: 11px !important; font-weight: 700 !important;
+  color: var(--caramel-dk) !important; margin-top: 4px;
+}
+
+/* Card TIP — botón amarillo */
+.luka-hero-calc-btn {
+  margin-top: 8px; padding: 8px 16px; border-radius: 8px; border: none;
+  background: #F5C842; color: #2B1F14;
+  font-size: 12.5px; font-weight: 700; cursor: pointer;
+  transition: transform 0.15s, filter 0.15s; align-self: flex-start;
+}
+.luka-hero-calc-btn:hover { filter: brightness(1.08); transform: scale(1.03); }
+
 /* ========== CTAs ========== */
 .luka-cta-dark {
   display: inline-flex; align-items: center; gap: 8px;
