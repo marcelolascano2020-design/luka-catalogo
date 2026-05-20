@@ -35,6 +35,7 @@ function normalizeProduct(p) {
     precio:     p.precio,
     activo:     p.activo,
     imagen_url: p.imagen_url || null,
+    destacado:  p.destacado ?? false,
   };
 }
 
@@ -161,6 +162,22 @@ function Catalog() {
           </button>
         </div>
       </div>
+
+      {products.some(p => p.destacado) && (
+        <section id="destacados" className="luka-main" style={{ paddingBottom: 0 }}>
+          <div className="luka-main-inner">
+            <div className="luka-feed">
+              <div className="luka-feed-head">
+                <div>
+                  <div className="luka-eyebrow">Selección especial</div>
+                  <h2>⭐ Destacados</h2>
+                </div>
+              </div>
+              <ProductGrid products={products.filter(p => p.destacado)} onAdd={addToCart} layout={layout} />
+            </div>
+          </div>
+        </section>
+      )}
 
       <main className="luka-main" id="catalogo">
         <div className="luka-main-inner">
