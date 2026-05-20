@@ -37,6 +37,11 @@ export default function Hero({ onCalcOpen }) {
     document.getElementById('catalogo')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
   };
 
+  const scrollToFeatured = () => {
+    const target = document.getElementById('destacados') || document.getElementById('catalogo');
+    target?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  };
+
   return (
     <section className="luka-hero">
       <div className="luka-hero-inner">
@@ -58,7 +63,7 @@ export default function Hero({ onCalcOpen }) {
           {/* Card HOY — clickeable, scrollea al catálogo */}
           <button
             className="luka-hero-card luka-hero-card-1 luka-hero-card-clickable"
-            onClick={scrollToCatalog}
+            onClick={scrollToFeatured}
           >
             <div className="luka-eyebrow">{cfg.hero_hoy_etiqueta}</div>
             <strong>{cfg.hero_hoy_titulo}</strong>

@@ -165,7 +165,7 @@ function Catalog() {
 
       {products.some(p => p.destacado) && (
         <section id="destacados" className="luka-main" style={{ paddingBottom: 0 }}>
-          <div className="luka-main-inner">
+          <div style={{ maxWidth: 1400, margin: '0 auto', padding: '0 28px' }}>
             <div className="luka-feed">
               <div className="luka-feed-head">
                 <div>
