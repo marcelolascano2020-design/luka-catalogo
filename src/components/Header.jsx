@@ -429,7 +429,7 @@ export default function Header({ query, setQuery, totalItems, onCartOpen, onCalc
             )}
           </div>
           <div className="luka-top-actions">
-            <button className="luka-pill" onClick={onCalcOpen}>
+            <button className="luka-pill luka-pill-calc" onClick={onCalcOpen}>
               <Icon.Calc s={16} /> <span>Calculadora de ración</span>
             </button>
             <button className="luka-pill luka-pill-primary" onClick={onCartOpen}>

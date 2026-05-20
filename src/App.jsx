@@ -146,6 +146,20 @@ function Catalog() {
 
       <Hero onCalcOpen={() => setCalcOpen(true)} />
 
+      {/* Mobile-only calculator banner — hidden on desktop via CSS */}
+      <div className="luka-calc-banner">
+        <div className="luka-calc-banner-inner">
+          <span className="luka-calc-banner-icon">🐾</span>
+          <div className="luka-calc-banner-text">
+            <strong>¿Cuánto le doy a mi mascota?</strong>
+            <span>Calculá la ración exacta según su peso y edad.</span>
+          </div>
+          <button className="luka-calc-banner-btn" onClick={() => setCalcOpen(true)}>
+            Calcular
+          </button>
+        </div>
+      </div>
+
       <main className="luka-main" id="catalogo">
         <div className="luka-main-inner">
           <CategoryFilter

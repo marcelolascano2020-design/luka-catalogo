@@ -57,7 +57,7 @@
 
 /* ========== Base ========== */
 * { box-sizing: border-box; }
-html, body { margin: 0; padding: 0; }
+html, body { margin: 0; padding: 0; overflow-x: hidden; }
 body {
   font-family: "Plus Jakarta Sans", system-ui, -apple-system, sans-serif;
   color: var(--ink);
@@ -121,7 +121,7 @@ a { color: inherit; }
 
 .luka-top-strip-wrap {
   background: var(--bg-strip); color: var(--bg-strip-fg);
-  font-size: 12px; font-weight: 500;
+  font-size: 12px; font-weight: 500; overflow: hidden;
 }
 .luka-top-strip {
   padding: 0 28px; max-width: 1400px; margin: 0 auto; overflow-x: auto; white-space: nowrap;
@@ -389,12 +389,32 @@ a { color: inherit; }
 }
 .luka-fab:hover { transform: scale(1.05) translateY(-2px); }
 
+/* ========== Calc banner (mobile only) ========== */
+.luka-calc-banner { display: none; }
+.luka-calc-banner-inner {
+  display: flex; align-items: center; gap: 14px;
+  background: var(--ink); color: #FCEFA8;
+  padding: 16px 18px;
+}
+.luka-calc-banner-icon { font-size: 28px; flex-shrink: 0; line-height: 1; }
+.luka-calc-banner-text { flex: 1; display: flex; flex-direction: column; gap: 2px; }
+.luka-calc-banner-text strong { font-size: 14px; font-weight: 800; line-height: 1.2; }
+.luka-calc-banner-text span   { font-size: 12px; opacity: 0.72; }
+.luka-calc-banner-btn {
+  flex-shrink: 0; padding: 9px 18px; border-radius: 999px; border: none;
+  background: #FCEFA8; color: var(--ink);
+  font-size: 13px; font-weight: 800; cursor: pointer; white-space: nowrap;
+}
+.luka-calc-banner-btn:active { background: var(--yellow); }
+
 /* ========== Responsive ========== */
 @media (max-width: 980px) {
   .luka-top-inner { grid-template-columns: 1fr auto; gap: 14px; padding: 12px 18px; }
   .luka-search { grid-column: 1 / -1; order: 3; max-width: none; }
   .luka-top-actions .luka-pill span { display: none; }
   .luka-top-actions .luka-pill { padding: 10px 12px; }
+  .luka-pill-calc { display: none; }
+  .luka-calc-banner { display: block; }
   .luka-hero-inner { grid-template-columns: 1fr; padding: 36px 18px 48px; gap: 28px; }
   .luka-hero-side { grid-template-columns: 1fr 1fr; }
   .luka-main-inner { grid-template-columns: 1fr; padding: 0 18px; gap: 20px; }
