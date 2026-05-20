@@ -7,7 +7,6 @@ import ProductGrid from './components/ProductGrid';
 import CartDrawer from './components/CartDrawer';
 import CalcModal from './components/CalcModal';
 import Footer from './components/Footer';
-import HeroCarousel from './components/HeroCarousel';
 import AdminPanel from './components/AdminPanel';
 import { Icon } from './components/Icons';
 import { CATEGORIAS as STATIC_CATS, PRODUCTOS as STATIC_PRODS } from './data/productos';
@@ -160,8 +159,6 @@ function Catalog() {
           </button>
         </div>
       </div>
-
-      <HeroCarousel />
 
       <main className="luka-main" id="catalogo">
         <div className="luka-main-inner">

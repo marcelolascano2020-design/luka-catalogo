@@ -24,10 +24,12 @@ function fallbackUrl(pet) {
   return FALLBACK[pet] ?? FALLBACK._default;
 }
 
-export function ProductImage({ p, ratio = "4 / 3" }) {
+export function ProductImage({ p, layout }) {
   const src = p.imagen_url || fallbackUrl(p.pet);
+  const isGrid = layout !== 'list';
   return (
-    <div className="luka-prod-img" style={{ aspectRatio: ratio }}>
+    <div className={`luka-prod-img${isGrid ? ' luka-prod-img-grid' : ''}`}
+      style={{ aspectRatio: layout === 'list' ? '1 / 1' : '4 / 3' }}>
       <img src={src} alt={p.name}
         style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
     </div>
@@ -35,11 +37,11 @@ export function ProductImage({ p, ratio = "4 / 3" }) {
 }
 
 export default function ProductCard({ p, onAdd, layout }) {
-  const cls = 'luka-card' + (layout === 'list' ? ' luka-card-list' : '');
+  const isList = layout === 'list';
   return (
-    <article className={cls}>
+    <article className={`luka-card${isList ? ' luka-card-list' : ''}`}>
       <div className="luka-card-media">
-        <ProductImage p={p} ratio={layout === 'list' ? '1 / 1' : '4 / 3'} />
+        <ProductImage p={p} layout={layout} />
         <span className="luka-pet-chip">{p.pet}</span>
       </div>
       <div className="luka-card-body">
@@ -51,9 +53,11 @@ export default function ProductCard({ p, onAdd, layout }) {
           <span>{p.tags.slice(0, 2).join(' · ')}</span>
         </div>
         {p.precio > 0 && <div className="luka-card-price">${p.precio.toLocaleString('es-AR')}</div>}
-{layout === 'list' && <p className="luka-card-desc">{p.desc}</p>}
+        {isList && <p className="luka-card-desc">{p.desc}</p>}
         <button className="luka-add" onClick={() => onAdd(p)}>
-          <Icon.Plus s={14} /> Sumar al pedido
+          <Icon.Plus s={14} />
+          <span className="luka-add-full">Sumar al pedido</span>
+          <span className="luka-add-short">Agregar</span>
         </button>
       </div>
     </article>
